@@ -93,8 +93,6 @@ This project includes comprehensive GitHub Actions workflows for automated testi
 - **Jobs**:
   - `test`: Run backend/frontend tests and linting
   - `build-and-push`: Build and push Docker images to GitHub Container Registry
-  - `deploy-staging`: Auto-deploy to staging on `develop` branch pushes
-  - `deploy-production`: Auto-deploy to production on `main` branch pushes
 
 #### 2. **Pull Request Tests** (`.github/workflows/pr-tests.yml`)
 - **Triggers**: PR opened/updated on `main`/`develop`
