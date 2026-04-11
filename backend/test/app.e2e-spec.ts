@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -16,11 +15,23 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/health (GET) - should return status & dynamic timestamp', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/health')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body.status).toBe('ok');
+        expect(res.body.timestamp).toBeDefined();
+        expect(typeof res.body.timestamp).toBe('string');
+      });
+  });
+
+  it('/api/health (GET) - should return exact API info', () => {
+    return request(app.getHttpServer()).get('/api/health').expect(200).expect({
+      status: 'ok',
+      api: 'Pokémon TCG Collection Tracker',
+      version: '1.0.0',
+    });
   });
 
   afterEach(async () => {
