@@ -9,9 +9,9 @@ updates:
       time: "02:00"
     open-pull-requests-limit: 10
     reviewers:
-      - "sanderlambrechts"  # Replace with your GitHub username
+      - "TheSander562"
     assignees:
-      - "sanderlambrechts"  # Replace with your GitHub username
+      - "TheSander562"
     commit-message:
       prefix: "deps"
       prefix-development: "deps-dev"
@@ -26,9 +26,9 @@ updates:
       time: "02:00"
     open-pull-requests-limit: 10
     reviewers:
-      - "sanderlambrechts"  # Replace with your GitHub username
+      - "TheSander562"
     assignees:
-      - "sanderlambrechts"  # Replace with your GitHub username
+      - "TheSander562"
     commit-message:
       prefix: "deps"
       prefix-development: "deps-dev"
@@ -43,9 +43,9 @@ updates:
       time: "02:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "sanderlambrechts"  # Replace with your GitHub username
+      - "TheSander562"
     assignees:
-      - "sanderlambrechts"  # Replace with your GitHub username
+      - "TheSander562"
     commit-message:
       prefix: "ci"
       include: "scope"
