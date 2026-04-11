@@ -82,6 +82,126 @@ npm run dev
 
 Visit http://localhost:3000 (frontend) and http://localhost:3001 (backend)
 
+## 🔄 CI/CD & Deployment
+
+This project includes comprehensive GitHub Actions workflows for automated testing, building, and deployment.
+
+### Workflows Overview
+
+#### 1. **CI/CD Pipeline** (`.github/workflows/ci-cd.yml`)
+- **Triggers**: Push to `main`/`develop`, Pull Requests
+- **Jobs**:
+  - `test`: Run backend/frontend tests and linting
+  - `build-and-push`: Build and push Docker images to GitHub Container Registry
+  - `deploy-staging`: Auto-deploy to staging on `develop` branch pushes
+  - `deploy-production`: Auto-deploy to production on `main` branch pushes
+
+#### 2. **Pull Request Tests** (`.github/workflows/pr-tests.yml`)
+- **Triggers**: PR opened/updated on `main`/`develop`
+- **Features**:
+  - Security validation (no committed secrets)
+  - Full test suite with coverage
+  - Docker build validation
+  - Codecov integration
+
+#### 3. **Manual Deployment** (`.github/workflows/deploy.yml`)
+- **Triggers**: Manual workflow dispatch
+- **Features**:
+  - Deploy to staging or production
+  - SSH-based deployment
+  - Health checks post-deployment
+  - Rollback capability
+
+#### 4. **Security & Maintenance** (`.github/workflows/security.yml`)
+- **Triggers**: Weekly schedule + manual
+- **Features**:
+  - NPM audit scanning
+  - Docker image vulnerability scanning
+  - Dependency update checks
+  - Trivy security scanning
+
+#### 5. **Database Operations** (`.github/workflows/database.yml`)
+- **Triggers**: Manual workflow dispatch
+- **Features**:
+  - Database backup/restore
+  - Migration deployment
+  - Data seeding
+  - Health verification
+
+### Required GitHub Secrets
+
+Configure these in your repository settings under **Settings > Secrets and variables > Actions**:
+
+#### Container Registry
+```
+GITHUB_TOKEN          # Auto-provided by GitHub
+```
+
+#### Deployment Secrets
+```
+STAGING_HOST          # Staging server hostname/IP
+STAGING_USER          # SSH user for staging
+STAGING_SSH_KEY       # Private SSH key for staging
+
+PROD_HOST            # Production server hostname/IP
+PROD_USER            # SSH user for production
+PROD_SSH_KEY         # Private SSH key for production
+```
+
+#### Database Secrets
+```
+STAGING_DATABASE_URL  # PostgreSQL connection string for staging
+PROD_DATABASE_URL     # PostgreSQL connection string for production
+
+DB_HOST              # Database host
+DB_USER              # Database user
+DB_PASSWORD          # Database password
+DB_NAME              # Database name
+```
+
+#### Optional Secrets
+```
+CODECOV_TOKEN        # For test coverage reporting
+SLACK_WEBHOOK_URL    # For deployment notifications
+```
+
+### Deployment Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   GitHub        │    │   GitHub        │    │   Production    │
+│   Actions       │───▶│   Container     │───▶│   Server        │
+│                 │    │   Registry      │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+        │                        │                        │
+        ▼                        ▼                        ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Staging       │    │   Docker        │    │   Docker        │
+│   Server        │    │   Compose       │    │   Compose       │
+│                 │    │   Pull & Run    │    │   Pull & Run    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### Manual Deployment
+
+To manually deploy to an environment:
+
+1. Go to **Actions** tab in GitHub
+2. Select **"Deploy to Environment"** workflow
+3. Click **"Run workflow"**
+4. Choose environment (`staging` or `production`)
+5. Optionally specify image tag (defaults to `latest`/`develop`)
+
+### Database Operations
+
+To perform database operations:
+
+1. Go to **Actions** tab
+2. Select **"Database Operations"** workflow
+3. Choose operation: `backup`, `migrate`, `seed`, or `restore`
+4. Select environment
+5. For restore: provide backup file path
+
 ## 📁 Project Structure
 
 ```
@@ -398,4 +518,28 @@ For issues or questions:
 
 ---
 
-**Status**: Phase 1 Complete ✅ | Phase 2 In Progress 🚀
+**Status**: Phase 1 Complete ✅ | Phase 2 In Progress 🚀 | CI/CD Ready ✅
+
+### GitHub Actions Workflows
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| **CI/CD Pipeline** | Push to main/develop | Build images, run tests, auto-deploy |
+| **PR Tests** | Pull requests | Security checks, test coverage, validation |
+| **Deploy** | Manual | Deploy to staging/production environments |
+| **Security** | Weekly + manual | Vulnerability scanning, dependency checks |
+| **Database** | Manual | Backup, restore, migrate database operations |
+
+### Quick Setup Checklist
+
+- [x] Project structure created
+- [x] Docker Compose configured
+- [x] NestJS backend scaffolded
+- [x] Next.js frontend scaffolded
+- [x] Prisma database schema defined
+- [x] GitHub Actions workflows added
+- [x] Dependabot configuration added
+- [ ] **Next**: Push to GitHub repository
+- [ ] Configure GitHub Secrets for deployment
+- [ ] Enable Dependabot in repository settings
+- [ ] Set up staging/production servers

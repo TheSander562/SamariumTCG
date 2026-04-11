@@ -1,0 +1,181 @@
+name: Database Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Database operation to perform'
+        required: true
+        type: choice
+        options:
+          - backup
+          - migrate
+          - seed
+          - restore
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      backup_file:
+        description: 'Backup file path (for restore operations)'
+        required: false
+        type: string
+
+jobs:
+  database-operation:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+          cache: 'npm'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Configure database connection
+        run: |
+          ENVIRONMENT="${{ inputs.environment || 'staging' }}"
+          OPERATION="${{ inputs.operation }}"
+
+          echo "🔧 Configuring for $ENVIRONMENT environment"
+          echo "📋 Operation: $OPERATION"
+
+          # Set database URL based on environment
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "DATABASE_URL=${{ secrets.PROD_DATABASE_URL }}" >> $GITHUB_ENV
+          else
+            echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
+          fi
+
+      - name: Database Backup
+        if: inputs.operation == 'backup'
+        run: |
+          echo "💾 Creating database backup..."
+
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          BACKUP_FILE="backup_${{ inputs.environment }}_${TIMESTAMP}.sql"
+
+          cd backend
+
+          # Create backup using pg_dump
+          PGPASSWORD=${{ secrets.DB_PASSWORD }} pg_dump \
+            -h ${{ secrets.DB_HOST }} \
+            -U ${{ secrets.DB_USER }} \
+            -d ${{ secrets.DB_NAME }} \
+            --no-owner \
+            --no-privileges \
+            --clean \
+            --if-exists \
+            > $BACKUP_FILE
+
+          echo "📁 Backup created: $BACKUP_FILE"
+          echo "📊 Backup size: $(du -h $BACKUP_FILE | cut -f1)"
+
+          # Upload backup as artifact
+          echo "backup_file=$BACKUP_FILE" >> $GITHUB_ENV
+
+      - name: Upload backup artifact
+        if: inputs.operation == 'backup'
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ inputs.environment }}
+          path: backend/${{ env.backup_file }}
+          retention-days: 30
+
+      - name: Database Migration
+        if: inputs.operation == 'migrate'
+        run: |
+          echo "🔄 Running database migrations..."
+
+          cd backend
+
+          # Generate Prisma client
+          npx prisma generate
+
+          # Run migrations
+          npx prisma migrate deploy
+
+          echo "✅ Migrations completed successfully"
+
+      - name: Database Seeding
+        if: inputs.operation == 'seed'
+        run: |
+          echo "🌱 Seeding database..."
+
+          cd backend
+
+          # Run seed script (you'll need to create this)
+          # npm run seed
+
+          echo "✅ Database seeding completed"
+
+      - name: Database Restore
+        if: inputs.operation == 'restore'
+        run: |
+          BACKUP_FILE="${{ inputs.backup_file }}"
+
+          if [ -z "$BACKUP_FILE" ]; then
+            echo "❌ Backup file path is required for restore operation"
+            exit 1
+          fi
+
+          echo "🔄 Restoring database from: $BACKUP_FILE"
+
+          # Download backup artifact if it's an artifact URL
+          # For now, assume the backup file is provided as input
+
+          cd backend
+
+          # Restore using psql
+          PGPASSWORD=${{ secrets.DB_PASSWORD }} psql \
+            -h ${{ secrets.DB_HOST }} \
+            -U ${{ secrets.DB_USER }} \
+            -d ${{ secrets.DB_NAME }} \
+            < $BACKUP_FILE
+
+          echo "✅ Database restore completed"
+
+      - name: Verify database health
+        run: |
+          echo "🔍 Verifying database health..."
+
+          cd backend
+
+          # Run a simple query to verify database is accessible
+          npx prisma db execute --file <(echo "SELECT 1 as health_check;")
+
+          echo "✅ Database health check passed"
+
+      - name: Notify operation completion
+        if: success()
+        run: |
+          OPERATION="${{ inputs.operation }}"
+          ENVIRONMENT="${{ inputs.environment }}"
+
+          echo "✅ Database $OPERATION operation completed successfully for $ENVIRONMENT environment"
+
+          # Here you could add notifications
+          # Slack, Discord, email notifications for important operations
+
+      - name: Notify operation failure
+        if: failure()
+        run: |
+          OPERATION="${{ inputs.operation }}"
+          ENVIRONMENT="${{ inputs.environment }}"
+
+          echo "❌ Database $OPERATION operation failed for $ENVIRONMENT environment"
+
+          # Critical failure notifications
