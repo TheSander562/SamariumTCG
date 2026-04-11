@@ -12,6 +12,10 @@ export class AppController {
 
   @Get('api/health')
   getApiHealth() {
-    return { status: 'ok', api: 'Pokémon TCG Collection Tracker', version: '1.0.0' };
+    return {
+      status: 'ok',
+      api: 'Pokémon TCG Collection Tracker',
+      version: '1.0.0',
+    };
   }
 }
