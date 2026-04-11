@@ -14,9 +14,20 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('health', () => {
+    it('should return health status', () => {
+      const result = appController.getHealth();
+      expect(result).toHaveProperty('status', 'ok');
+      expect(result).toHaveProperty('timestamp');
+    });
+  });
+
+  describe('api/health', () => {
+    it('should return API health status', () => {
+      const result = appController.getApiHealth();
+      expect(result).toHaveProperty('status', 'ok');
+      expect(result).toHaveProperty('api', 'Pokémon TCG Collection Tracker');
+      expect(result).toHaveProperty('version', '1.0.0');
     });
   });
 });
