@@ -1,0 +1,219 @@
+// This is your Prisma schema file for Pokémon TCG Collection Tracker
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// AUTHENTICATION & USER MANAGEMENT
+// ============================================================================
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  name          String
+  
+  // Preferences
+  locale        String      @default("en")
+  theme         String      @default("dark") // "dark" or "light"
+  
+  // Authorization
+  role          Role        @default(USER)
+  
+  // OAuth
+  oauthProvider String?
+  oauthId       String?
+  
+  // Relations
+  collections   UserCollection[]
+  binders       VirtualBinder[]
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([oauthProvider, oauthId])
+  @@index([email])
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+// ============================================================================
+// CARD DATABASE (from TCGdex)
+// ============================================================================
+
+model Expansion {
+  id              String      @id @default(cuid())
+  tcgdexId        String      @unique
+  name            String
+  series          String
+  releaseDate     DateTime?
+  pocketToggle    Boolean     @default(false)
+  imageUrl        String?
+  logoUrl         String?
+  cardCount       Int         @default(0)
+  
+  // Relations
+  cards           Card[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([tcgdexId])
+  @@index([series])
+}
+
+model Card {
+  id              String      @id @default(cuid())
+  tcgdexId        String      @unique
+  expansionId     String
+  expansion       Expansion   @relation(fields: [expansionId], references: [id], onDelete: Cascade)
+  
+  // Card Details
+  name            String
+  type            String? // "Fire", "Water", etc.
+  rarity          String?  // "Common", "Uncommon", etc.
+  hp              Int?
+  artist          String?
+  cardNumber      String   // "1" from "1/102"
+  totalInSet      Int      // "102" from "1/102"
+  
+  // Image handling
+  imageUrl        String?
+  cachedImagePath String?  // Path to locally cached image
+  
+  // Relations
+  userCollections UserCollection[]
+  binderCards     VirtualBinderCard[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([expansionId, cardNumber])
+  @@index([tcgdexId])
+  @@index([name])
+  @@index([type])
+  @@index([rarity])
+  @@index([artist])
+  @@index([expansionId])
+}
+
+// ============================================================================
+// USER COLLECTION
+// ============================================================================
+
+model UserCollection {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  cardId            String
+  card              Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  
+  // Collection tracking
+  quantity          Int       @default(1)
+  collectionNumber  String?   // Custom collection number if different from card number
+  
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([userId, cardId])
+  @@index([userId])
+  @@index([cardId])
+}
+
+// ============================================================================
+// VIRTUAL BINDERS
+// ============================================================================
+
+model VirtualBinder {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Binder details
+  name            String
+  description     String?
+  isChecklist     Boolean   @default(false) // true for checklist mode, false for collection display
+  
+  // Relations
+  cards           VirtualBinderCard[]
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model VirtualBinderCard {
+  id              String    @id @default(cuid())
+  binderId        String
+  binder          VirtualBinder @relation(fields: [binderId], references: [id], onDelete: Cascade)
+  
+  cardId          String
+  card            Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  
+  // For checklist mode or collection tracking within binder
+  quantity        Int       @default(1)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+
+  @@unique([binderId, cardId])
+  @@index([binderId])
+  @@index([cardId])
+}
+
+// ============================================================================
+// BACKUP & ADMIN
+// ============================================================================
+
+model BackupLog {
+  id                String    @id @default(cuid())
+  
+  // Backup details
+  backupGroups      String[]  // "users", "collections", "cards", "images", "system"
+  backupPath        String
+  backupSize        BigInt?
+  
+  // Status
+  status            String    @default("completed") // "pending", "completed", "failed"
+  errorMessage      String?
+  
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  completedAt       DateTime?
+
+  @@index([createdAt])
+}
+
+model SyncLog {
+  id                String    @id @default(cuid())
+  
+  // Sync details
+  syncType          String    // "full", "incremental"
+  cardsAdded        Int       @default(0)
+  cardsUpdated      Int       @default(0)
+  cardsDeleted      Int       @default(0)
+  imagesDownloaded  Int       @default(0)
+  
+  // Status
+  status            String    @default("completed") // "pending", "running", "completed", "failed"
+  errorMessage      String?
+  
+  // Timestamps
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+
+  @@index([startedAt])
+}
