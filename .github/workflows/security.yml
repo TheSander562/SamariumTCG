@@ -41,7 +41,7 @@ jobs:
           npm audit --audit-level moderate || true
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -105,7 +105,7 @@ jobs:
           docker build -t samarium-frontend-scan .
 
       - name: Scan backend image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: 'image'
           scan-ref: 'samarium-backend-scan'
@@ -113,7 +113,7 @@ jobs:
           output: 'backend-trivy-results.sarif'
 
       - name: Scan frontend image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           scan-type: 'image'
           scan-ref: 'samarium-frontend-scan'
