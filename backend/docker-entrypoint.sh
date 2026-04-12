@@ -3,7 +3,7 @@ set -e
 
 echo "⏳ Waiting for database to be ready..."
 # Wait for postgres to be ready
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
+until pg_isready -d "$DATABASE_URL"; do
   sleep 1
 done
 

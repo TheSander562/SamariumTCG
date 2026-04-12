@@ -7,7 +7,7 @@ services:
       samariumtcg-backend:
         condition: service_started
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     ports:
       - "3000:3000"
     networks:
@@ -22,14 +22,10 @@ services:
       samariumtcg-postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      DB_HOST: samariumtcg-postgres
-      DB_PORT: 5432
-      DB_USER: samariumtcg
-      DB_PASSWORD: changeme
-      DB_NAME: samarium_tcg
-      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-in-production}
-      JWT_EXPIRY: ${JWT_EXPIRY:-7d}
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY: ${JWT_EXPIRY}
       PORT: 3001
     ports:
       - "3001:3001"
@@ -39,12 +35,12 @@ services:
 
   # PostgreSQL Database
   samariumtcg-postgres:
-    image: postgres:18-alpine
+    image: postgres:18
     container_name: samariumtcg-postgres
     environment:
-      POSTGRES_USER: ${DB_USER:-samarium}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-      POSTGRES_DB: ${DB_NAME:-samarium_tcg}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - samariumtcg_postgres_data:/var/lib/postgresql
     networks:
@@ -52,7 +48,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-samarium}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
