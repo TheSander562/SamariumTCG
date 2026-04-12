@@ -43,9 +43,10 @@ docker-compose ps
 ```
 
 Services will be available at:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
-- **API Health Check**: http://localhost:3001/api/health
+
+- **Frontend**: <http://localhost:3000>
+- **Backend API**: <http://localhost:3001>
+- **API Health Check**: <http://localhost:3001/api/health>
 - **Database**: localhost:5432 (PostgreSQL)
 
 ### Local Development
@@ -80,7 +81,7 @@ npm install
 npm run dev
 ```
 
-Visit http://localhost:3000 (frontend) and http://localhost:3001 (backend)
+Visit <http://localhost:3000> (frontend) and <http://localhost:3001> (backend)
 
 ## 🔄 CI/CD & Deployment
 
@@ -89,12 +90,14 @@ This project includes comprehensive GitHub Actions workflows for automated testi
 ### Workflows Overview
 
 #### 1. **CI/CD Pipeline** (`.github/workflows/ci-cd.yml`)
+
 - **Triggers**: Push to `main`/`develop`, Pull Requests
 - **Jobs**:
   - `test`: Run backend/frontend tests and linting
   - `build-and-push`: Build and push Docker images to GitHub Container Registry
 
 #### 2. **Pull Request Tests** (`.github/workflows/pr-tests.yml`)
+
 - **Triggers**: PR opened/updated on `main`/`develop`
 - **Features**:
   - Security validation (no committed secrets)
@@ -103,6 +106,7 @@ This project includes comprehensive GitHub Actions workflows for automated testi
   - Codecov integration
 
 #### 3. **Security & Maintenance** (`.github/workflows/security.yml`)
+
 - **Triggers**: Weekly schedule + manual
 - **Features**:
   - NPM audit scanning
@@ -112,7 +116,7 @@ This project includes comprehensive GitHub Actions workflows for automated testi
 
 ### Deployment Architecture
 
-```
+```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   GitHub        │    │   GitHub        │    │   Production    │
 │   Actions       │───▶│   Container     │───▶│   Server        │
@@ -149,7 +153,7 @@ To perform database operations:
 
 ## 📁 Project Structure
 
-```
+```text
 samariumtcg/
 ├── docker-compose.yml          # Multi-container orchestration
 ├── .env.example                # Environment configuration template
@@ -201,7 +205,7 @@ samariumtcg/
 
 ### Relationships
 
-```
+```text
 User ──┬── UserCollection ──── Card (via Expansion)
        ├── VirtualBinder ──────┐
        └─────────────────────┐ │
@@ -277,7 +281,7 @@ docker-compose build
 docker exec -it samarium_postgres psql -U samarium -d samarium_tcg
 ```
 
-### Database
+### Database commands
 
 ```bash
 # Create migration
@@ -293,7 +297,7 @@ npx prisma generate
 npx prisma studio
 ```
 
-### Backend
+### Backend commands
 
 ```bash
 cd backend
@@ -311,7 +315,7 @@ npm run format
 npm run lint
 ```
 
-### Frontend
+### Frontend commands
 
 ```bash
 cd frontend
@@ -357,29 +361,29 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ## 📊 Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
-│                 Docker Compose Network                       │
+│                 Docker Compose Network                      │
 ├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────┐          ┌──────────────┐                  │
-│  │  Next.js     │          │  NestJS      │                  │
-│  │  Frontend    │◄────────►│  Backend     │                  │
-│  │  :3000       │          │  :3001       │                  │
-│  └──────────────┘          └──────────────┘                  │
-│                                    │                          │
-│                                    ▼ (Prisma ORM)            │
-│                          ┌──────────────────┐                │
-│                          │   PostgreSQL     │                │
-│                          │   :5432          │                │
-│                          └──────────────────┘                │
-│                                    │                          │
-│                                    ▼                          │
-│                          ┌──────────────────┐                │
-│                          │  Docker Volumes  │                │
-│                          │ (data, images)   │                │
-│                          └──────────────────┘                │
-│                                                               │
+│                                                             │
+│  ┌──────────────┐          ┌──────────────┐                 │
+│  │  Next.js     │          │  NestJS      │                 │
+│  │  Frontend    │◄────────►│  Backend     │                 │
+│  │  :3000       │          │  :3001       │                 │
+│  └──────────────┘          └──────────────┘                 │
+│                                    │                        │
+│                                    ▼ (Prisma ORM)           │
+│                          ┌──────────────────┐               │
+│                          │   PostgreSQL     │               │
+│                          │   :5432          │               │
+│                          └──────────────────┘               │
+│                                    │                        │
+│                                    ▼                        │
+│                          ┌──────────────────┐               │
+│                          │  Docker Volumes  │               │
+│                          │ (data, images)   │               │
+│                          └──────────────────┘               │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -394,12 +398,17 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### Health Check
 
-```
+```http
 GET /health
 GET /api/health
-
-Response: { status: "ok", api: "Pokémon TCG Collection Tracker", version: "1.0.0" }
 ```
+
+```json
+{
+  "status": "ok",
+  "api": "Pokémon TCG Collection Tracker",
+  "version": "1.0.0"
+}
 
 More endpoints coming in Phase 2+
 
@@ -446,6 +455,7 @@ This project is open source. See LICENSE file for details.
 ## 🚀 Deployment
 
 For production deployment:
+
 1. Update `.env` with production values (strong JWT_SECRET, real DB credentials)
 2. Set `NODE_ENV=production`
 3. Configure proper SSL/TLS certificates
@@ -457,6 +467,7 @@ For production deployment:
 ## 👨‍💻 Support
 
 For issues or questions:
+
 - Check existing issues on GitHub
 - Create a new issue with detailed information
 - Submit pull requests for improvements
