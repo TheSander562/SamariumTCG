@@ -5,7 +5,7 @@ FROM node:${NODE_VERSION} AS dependencies
 # Set working directory
 WORKDIR /app
 
-# Copy only what's needed for deps first (better caching)
+# Copy only what is needed for deps first (better caching)
 COPY package*.json ./
 COPY prisma ./prisma
 
