@@ -182,7 +182,7 @@ model BackupLog {
   id                String    @id @default(cuid())
   
   // Backup details
-  backupGroups      String[]  // "users", "collections", "cards", "images", "system"
+  backupGroups      Json  // "users", "collections", "cards", "images", "system"
   backupPath        String
   backupSize        BigInt?
   
