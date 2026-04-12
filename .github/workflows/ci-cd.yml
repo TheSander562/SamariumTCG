@@ -3,8 +3,14 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
 
 env:
   REGISTRY: ghcr.io
