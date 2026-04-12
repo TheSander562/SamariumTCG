@@ -100,15 +100,6 @@ jobs:
           cd frontend
           npm run test:cov
 
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./backend/coverage/lcov.info,./frontend/coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-
   # Docker build test
   docker-build-test:
     runs-on: ubuntu-latest

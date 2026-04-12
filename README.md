@@ -102,66 +102,13 @@ This project includes comprehensive GitHub Actions workflows for automated testi
   - Docker build validation
   - Codecov integration
 
-#### 3. **Manual Deployment** (`.github/workflows/deploy.yml`)
-- **Triggers**: Manual workflow dispatch
-- **Features**:
-  - Deploy to staging or production
-  - SSH-based deployment
-  - Health checks post-deployment
-  - Rollback capability
-
-#### 4. **Security & Maintenance** (`.github/workflows/security.yml`)
+#### 3. **Security & Maintenance** (`.github/workflows/security.yml`)
 - **Triggers**: Weekly schedule + manual
 - **Features**:
   - NPM audit scanning
   - Docker image vulnerability scanning
   - Dependency update checks
   - Trivy security scanning
-
-#### 5. **Database Operations** (`.github/workflows/database.yml`)
-- **Triggers**: Manual workflow dispatch
-- **Features**:
-  - Database backup/restore
-  - Migration deployment
-  - Data seeding
-  - Health verification
-
-### Required GitHub Secrets
-
-Configure these in your repository settings under **Settings > Secrets and variables > Actions**:
-
-#### Container Registry
-```
-GITHUB_TOKEN          # Auto-provided by GitHub
-```
-
-#### Deployment Secrets
-```
-STAGING_HOST          # Staging server hostname/IP
-STAGING_USER          # SSH user for staging
-STAGING_SSH_KEY       # Private SSH key for staging
-
-PROD_HOST            # Production server hostname/IP
-PROD_USER            # SSH user for production
-PROD_SSH_KEY         # Private SSH key for production
-```
-
-#### Database Secrets
-```
-STAGING_DATABASE_URL  # PostgreSQL connection string for staging
-PROD_DATABASE_URL     # PostgreSQL connection string for production
-
-DB_HOST              # Database host
-DB_USER              # Database user
-DB_PASSWORD          # Database password
-DB_NAME              # Database name
-```
-
-#### Optional Secrets
-```
-CODECOV_TOKEN        # For test coverage reporting
-SLACK_WEBHOOK_URL    # For deployment notifications
-```
 
 ### Deployment Architecture
 
@@ -171,13 +118,13 @@ SLACK_WEBHOOK_URL    # For deployment notifications
 │   Actions       │───▶│   Container     │───▶│   Server        │
 │                 │    │   Registry      │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                        │                        │
-        ▼                        ▼                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Staging       │    │   Docker        │    │   Docker        │
-│   Server        │    │   Compose       │    │   Compose       │
-│                 │    │   Pull & Run    │    │   Pull & Run    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                 │                        │
+                                 ▼                        ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │   Docker        │    │   Docker        │
+                       │   Compose       │    │   Compose       │
+                       │   Pull & Run    │    │   Pull & Run    │
+                       └─────────────────┘    └─────────────────┘
 ```
 
 ### Manual Deployment
@@ -524,20 +471,4 @@ For issues or questions:
 |----------|---------|---------|
 | **CI/CD Pipeline** | Push to main/develop | Build images, run tests, auto-deploy |
 | **PR Tests** | Pull requests | Security checks, test coverage, validation |
-| **Deploy** | Manual | Deploy to staging/production environments |
 | **Security** | Weekly + manual | Vulnerability scanning, dependency checks |
-| **Database** | Manual | Backup, restore, migrate database operations |
-
-### Quick Setup Checklist
-
-- [x] Project structure created
-- [x] Docker Compose configured
-- [x] NestJS backend scaffolded
-- [x] Next.js frontend scaffolded
-- [x] Prisma database schema defined
-- [x] GitHub Actions workflows added
-- [x] Dependabot configuration added
-- [ ] **Next**: Push to GitHub repository
-- [ ] Configure GitHub Secrets for deployment
-- [ ] Enable Dependabot in repository settings
-- [ ] Set up staging/production servers
