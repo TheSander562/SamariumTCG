@@ -15,11 +15,18 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
+  interface HealthResponse {
+    status: string;
+    timestamp: string;
+  }
+
+  /* eslint-disable @typescript-eslint/no-unsafe-argument */
+
   it('/health (GET) - should return status & dynamic timestamp', () => {
     return request(app.getHttpServer())
       .get('/health')
       .expect(200)
-      .expect((res) => {
+      .expect((res: { body: HealthResponse }) => {
         expect(res.body.status).toBe('ok');
         expect(res.body.timestamp).toBeDefined();
         expect(typeof res.body.timestamp).toBe('string');
