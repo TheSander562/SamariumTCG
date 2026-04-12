@@ -1,58 +1,70 @@
-# Build stage
-FROM node:25-alpine AS builder
+# ---- Dependencies Installation Stage ----
+ARG NODE_VERSION=25-slim
+FROM node:${NODE_VERSION} AS dependencies
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy only what's needed for deps first (better caching)
 COPY package*.json ./
 COPY prisma ./prisma
 
-# Install dependencies
+# Install project dependencies
 RUN npm ci
 
-# Copy source code
-COPY src ./src
+# Copy rest of the app
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
+COPY src ./src
 
-# Build application
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build NestJS app
 RUN npm run build
 
-# Runtime stage
-FROM node:25-alpine
+# ---- Runtime stage ----
+FROM node:${NODE_VERSION} AS builder
 
+# Set working directory
 WORKDIR /app
 
-# Install dumb-init and postgresql client
-RUN apk add --no-cache dumb-init postgresql-client
+# Install runtime tools
+RUN apk add --no-cache dumb-init
 
-# Copy package files
+# Set production environment variables
+ENV NODE_ENV=production
+
+# Copy only necessary files
 COPY package*.json ./
-COPY prisma ./prisma
-COPY prisma.config.ts ./
 
-# Install production dependencies only
-RUN npm ci --only=production
+# Install production deps only
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy built application from builder
-COPY --from=builder /app/dist ./dist
+# Copy Prisma files + generated client
+COPY --from=dependencies /app/prisma ./prisma
+COPY --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
 
-# Create images directory for caching
+# Copy compiled app
+COPY --from=dependencies /app/dist ./dist
+
+# Create runtime dirs
 RUN mkdir -p /app/images
 
-# Copy entrypoint script
+# Copy entrypoint
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
-# Expose port
+# Switch to non-root user for security best practices
+USER node
+
+# Expose port 3001to allow API traffic
 EXPOSE 3001
 
-# Health check
+# Add healthcheck to ensure the application is running and responsive
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-# Use dumb-init to handle signals properly
+# Start NestJS standalone application
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start application with entrypoint script
 CMD ["./docker-entrypoint.sh"]

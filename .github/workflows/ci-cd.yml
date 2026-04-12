@@ -44,6 +44,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '25'
+          cache: 'npm'
 
       - name: Install backend dependencies
         run: |
@@ -77,10 +78,31 @@ jobs:
           cd frontend
           npm run lint
 
+  check-changes:
+    runs-on: ubuntu-latest
+    # define the output variables, and set them to 
+    # the output from `filter` step
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
   # Build and push Docker images
   build-and-push:
     runs-on: ubuntu-latest
-    needs: test
+    # depend on the `check-changes` job to succeed
+    needs:
+      - test
+      - check-changes
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
 
     permissions:
@@ -103,6 +125,7 @@ jobs:
 
       - name: Extract metadata for backend
         id: meta-backend
+        if: ${{ needs.check-changes.outputs.backend == 'true' }}
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
@@ -114,6 +137,7 @@ jobs:
 
       - name: Extract metadata for frontend
         id: meta-frontend
+        if: ${{ needs.check-changes.outputs.frontend == 'true' }}
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
@@ -124,6 +148,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push backend image
+        if: ${{ needs.check-changes.outputs.backend == 'true' }}
         uses: docker/build-push-action@v7
         with:
           context: ./backend
@@ -133,8 +158,10 @@ jobs:
           labels: ${{ steps.meta-backend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
 
       - name: Build and push frontend image
+        if: ${{ needs.check-changes.outputs.frontend == 'true' }}
         uses: docker/build-push-action@v7
         with:
           context: ./frontend
@@ -144,3 +171,4 @@ jobs:
           labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
