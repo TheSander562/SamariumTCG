@@ -1,28 +1,36 @@
 services:
   # Next.js Frontend
   samariumtcg-frontend:
-    image: ghcr.io/thesander562/samariumtcg/frontend:main
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: samariumtcg-frontend
     depends_on:
       samariumtcg-backend:
         condition: service_started
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    volumes:
+      - ./frontend/app:/app/app
+      - ./frontend/components:/app/components
+      - ./frontend/lib:/app/lib
+      - ./frontend/public:/app/public
     ports:
       - "3000:3000"
     networks:
       - samariumtcg_internal
     restart: unless-stopped
 
-  # NestJS Backend API
   samariumtcg-backend:
-    image: ghcr.io/thesander562/samariumtcg/backend:main
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: samariumtcg-backend
     depends_on:
       samariumtcg-postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
       DB_HOST: samariumtcg-postgres
       DB_PORT: 5432
       DB_USER: samariumtcg
@@ -31,6 +39,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-change-in-production}
       JWT_EXPIRY: ${JWT_EXPIRY:-7d}
       PORT: 3001
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - shared_images:/app/images
     ports:
       - "3001:3001"
     networks:
