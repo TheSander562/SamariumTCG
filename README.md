@@ -479,7 +479,7 @@ For issues or questions:
 ### GitHub Actions Workflows
 
 | Workflow | Trigger | Purpose |
-|----------|---------|---------|
+| -------- | ------- | ------- |
 | **CI/CD Pipeline** | Push to main/develop | Build images, run tests, auto-deploy |
 | **PR Tests** | Pull requests | Security checks, test coverage, validation |
 | **Security** | Weekly + manual | Vulnerability scanning, dependency checks |
