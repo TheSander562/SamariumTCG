@@ -44,6 +44,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy Prisma files + generated client
 COPY --from=dependencies /app/prisma ./prisma
 COPY --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
 
 # Copy compiled app
 COPY --from=dependencies /app/dist ./dist
