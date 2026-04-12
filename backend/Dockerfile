@@ -30,7 +30,7 @@ FROM node:${NODE_VERSION} AS builder
 WORKDIR /app
 
 # Install runtime tools
-RUN apk add --no-cache dumb-init
+RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/* && apt-get clean
 
 # Set production environment variables
 ENV NODE_ENV=production
