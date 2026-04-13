@@ -180,8 +180,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
 
       - name: Build and push frontend image
         if: ${{ needs.check-changes.outputs.frontend == 'true' }}

@@ -1,5 +1,5 @@
 # ---- Dependencies Installation Stage ----
-ARG NODE_VERSION=25-slim
+ARG NODE_VERSION=25-alpine
 
 FROM node:${NODE_VERSION} AS dependencies
 

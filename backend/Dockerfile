@@ -1,5 +1,5 @@
 # ---- Dependencies Installation Stage ----
-ARG NODE_VERSION=25-slim
+ARG NODE_VERSION=25-alpine
 FROM node:${NODE_VERSION} AS dependencies
 
 # Set working directory
@@ -8,7 +8,6 @@ WORKDIR /app
 # Copy only what is needed for deps first (better caching)
 COPY package*.json ./
 COPY prisma ./prisma
-COPY prisma.config.ts ./
 
 # Install project dependencies
 RUN npm ci
@@ -17,9 +16,6 @@ RUN npm ci
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
-
-# Install runtime tools
-RUN apt-get update && apt-get install -y dumb-init openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -32,6 +28,9 @@ FROM node:${NODE_VERSION} AS builder
 
 # Set working directory
 WORKDIR /app
+
+# Install runtime tools
+RUN apk add --no-cache dumb-init
 
 # Set production environment variables
 ENV NODE_ENV=production
