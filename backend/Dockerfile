@@ -6,8 +6,8 @@ FROM node:${NODE_VERSION} AS dependencies
 # Set working directory
 WORKDIR /app
 
-# Install required binaries
-RUN apt-get update && apt-get install -y postgresql-client openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy package json for npm install
 COPY package.json package-lock.json ./
@@ -22,11 +22,6 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
 
-# COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
 # Build NestJS application
 RUN npm run build
 
@@ -35,6 +30,9 @@ FROM node:${NODE_VERSION} AS builder
 
 # Set working directory
 WORKDIR /app
+
+# Install required binaries
+RUN apt-get update && apt-get install -y postgresql-client openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set production environment variables
 ENV NODE_ENV=production
@@ -50,8 +48,6 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy Prisma files + generated client
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
 COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
-COPY --chown=node:node --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
-COPY --chown=node:node --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
 
 # Create images directory for caching
 RUN mkdir -p /app/images

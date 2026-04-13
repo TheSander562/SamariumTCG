@@ -1,7 +1,7 @@
 services:
   # Next.js Frontend
   samariumtcg-frontend:
-    image: ghcr.io/thesander562/samariumtcg/frontend:pr-17
+    image: ghcr.io/thesander562/samariumtcg/frontend:main
     container_name: samariumtcg-frontend
     depends_on:
       samariumtcg-backend:
@@ -16,7 +16,7 @@ services:
 
   # NestJS Backend API
   samariumtcg-backend:
-    image: ghcr.io/thesander562/samariumtcg/backend:pr-17
+    image: ghcr.io/thesander562/samariumtcg/backend:main
     container_name: samariumtcg-backend
     depends_on:
       samariumtcg-postgres:
