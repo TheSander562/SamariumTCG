@@ -8,7 +8,7 @@ WORKDIR /app
 # Copy only what is needed for deps first (better caching)
 COPY package*.json ./
 COPY prisma ./prisma
-# COPY prisma.config.ts ./
+COPY prisma.config.ts ./
 
 # Install project dependencies
 RUN npm ci
