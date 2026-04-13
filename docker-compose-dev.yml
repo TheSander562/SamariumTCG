@@ -37,7 +37,6 @@ services:
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma
-      - shared_images:/app/images
     ports:
       - "3001:3001"
     networks:
