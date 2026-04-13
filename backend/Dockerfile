@@ -1,22 +1,21 @@
 # ---- Dependencies Installation Stage ----
-ARG NODE_VERSION=25-alpine
+ARG NODE_VERSION=25-slim
 FROM node:${NODE_VERSION} AS dependencies
 
 # Set working directory
 WORKDIR /app
 
-# Copy only what is needed for deps first (better caching)
-COPY package*.json ./
-COPY prisma ./prisma
-COPY prisma.config.ts ./
+# Run updates and install openssl
+RUN apt-get update -y && apt-get install -y openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy package json for npm install
+COPY package.json package-lock.json ./
 
 # Install project dependencies
 RUN npm ci
 
-# Copy rest of the app
-COPY src ./src
-COPY tsconfig*.json ./
-COPY nest-cli.json ./
+# Copy the files
+COPY . .
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -30,29 +29,25 @@ FROM node:${NODE_VERSION} AS builder
 # Set working directory
 WORKDIR /app
 
-# Install dumb-init and postgresql client
-RUN apk add --no-cache dumb-init postgresql-client
+# Install dumb-init
+RUN apt-get update && apt-get install -y openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set production environment variables
 ENV NODE_ENV=production
 
-# Copy only necessary files
-COPY package*.json ./
+# Copy necessary files
+COPY --chown=node:node --from=dependencies /app/dist ./dist
+COPY --chown=node:node --from=dependencies /app/package.json .
+COPY --chown=node:node --from=dependencies /app/package-lock.json .
 
 # Install production deps only
 RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy Prisma files + generated client
-COPY --from=dependencies /app/prisma ./prisma
-COPY --from=dependencies /app/prisma.config.ts ./
-COPY --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
-# COPY prisma ./prisma
-# COPY prisma.config.ts ./
-
-# Copy compiled/built app
-# COPY --from=dependencies /app/dist ./dist
-COPY --from=dependencies /app/dist ./dist
+COPY --chown=node:node --from=dependencies /app/prisma ./prisma
+COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
+COPY --chown=node:node --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=node:node --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
 
 # Install production dependencies only
 # RUN npm ci --only=production

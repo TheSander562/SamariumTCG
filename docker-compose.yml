@@ -23,7 +23,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV}
-      DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+      DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRY: ${JWT_EXPIRY}
       PORT: 3001
