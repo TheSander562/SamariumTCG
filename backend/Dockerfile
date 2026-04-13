@@ -8,6 +8,7 @@ WORKDIR /app
 # Copy only what is needed for deps first (better caching)
 COPY package*.json ./
 COPY prisma ./prisma
+COPY prisma.config.ts ./
 
 # Install project dependencies
 RUN npm ci
@@ -43,6 +44,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy Prisma files + generated client
 COPY --from=dependencies /app/prisma ./prisma
+COPY --from=dependencies /app/prisma.config.ts ./
 COPY --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
 
