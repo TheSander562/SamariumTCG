@@ -8,6 +8,7 @@ WORKDIR /app
 # Copy only what is needed for deps first (better caching)
 COPY package*.json ./
 COPY prisma ./prisma
+# COPY prisma.config.ts ./
 
 # Install project dependencies
 RUN npm ci
@@ -18,7 +19,7 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
 # Generate Prisma client
-# RUN npx prisma generate
+RUN npx prisma generate
 
 # Build NestJS application
 RUN npm run build
@@ -33,30 +34,28 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init postgresql-client
 
 # Set production environment variables
-# ENV NODE_ENV=production
+ENV NODE_ENV=production
 
 # Copy only necessary files
 COPY package*.json ./
 
 # Install production deps only
-# RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy Prisma files + generated client
-# COPY --from=dependencies /app/prisma ./prisma
-# COPY --from=dependencies /app/prisma.config.ts ./
-# COPY --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
-# COPY --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
-COPY prisma ./prisma
-COPY prisma.config.ts ./
+COPY --from=dependencies /app/prisma ./prisma
+COPY --from=dependencies /app/prisma.config.ts ./
+COPY --from=dependencies /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=dependencies /app/node_modules/@prisma ./node_modules/@prisma
+# COPY prisma ./prisma
+# COPY prisma.config.ts ./
 
-# Copy compiled app
+# Copy compiled/built app
 # COPY --from=dependencies /app/dist ./dist
+COPY --from=dependencies /app/dist ./dist
 
 # Install production dependencies only
 # RUN npm ci --only=production
-
-# Copy compiled/built application
-COPY --from=dependencies /app/dist ./dist
 
 # Create images directory for caching
 RUN mkdir -p /app/images
@@ -78,5 +77,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start application with entrypoint script
+# Start NestJS application with entrypoint script
 CMD ["./docker-entrypoint.sh"]
