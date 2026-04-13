@@ -16,6 +16,10 @@ env:
   BACKEND_IMAGE: ${{ github.repository }}/backend
   FRONTEND_IMAGE: ${{ github.repository }}/frontend
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   # Test job - runs on PR and push
   test:
