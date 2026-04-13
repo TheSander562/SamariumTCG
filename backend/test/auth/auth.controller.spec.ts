@@ -1,12 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from '../src/auth/auth.controller';
-import { AuthService } from '../src/auth/auth.service';
-import { UsersService } from '../src/users/users.service';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { AuthController } from '../../src/auth/auth.controller';
+import { AuthService } from '../../src/auth/auth.service';
+import { UsersService } from '../../src/users/users.service';
+import { PrismaService } from '../../src/prisma/prisma.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: AuthService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
