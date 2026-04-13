@@ -9,10 +9,7 @@ on:
       - 'frontend/**'
   pull_request:
     branches: [ main, dev ]
-    paths:
-      - '.github/**'
-      - 'backend/**'
-      - 'frontend/**'
+    types: [opened, synchronize, reopened]
 
 env:
   REGISTRY: ghcr.io
