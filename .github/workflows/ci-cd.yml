@@ -28,7 +28,7 @@ jobs:
           POSTGRES_PASSWORD: test
           POSTGRES_DB: test
         options: >-
-          --health-cmd pg_isready
+          --health-cmd pg_isready -U test
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -103,7 +103,13 @@ jobs:
     needs:
       - test
       - check-changes
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    if: |
+      (github.event_name == 'push' && (
+        github.ref == 'refs/heads/main' ||
+        github.ref == 'refs/heads/dev' ||
+        startsWith(github.ref, 'refs/tags/')
+      )) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
     permissions:
       contents: read
