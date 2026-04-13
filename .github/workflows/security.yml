@@ -54,40 +54,39 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  # Dependency updates
-  dependency-updates:
+  # Docker image vulnerability scan
+  docker-security-scan-frontend:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '25'
-
-      - name: Check for outdated dependencies (backend)
-        run: |
-          cd backend
-          echo "📦 Backend dependency status:"
-          npm outdated || true
-
-      - name: Check for outdated dependencies (frontend)
+      - name: Build frontend image for scanning
         run: |
           cd frontend
-          echo "📦 Frontend dependency status:"
-          npm outdated || true
+          docker build -t samarium-frontend-scan .
 
-      - name: Create dependency update PR (if needed)
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'image'
+          scan-ref: 'samarium-frontend-scan'
+          format: 'sarif'
+          output: 'frontend-trivy-results.sarif'
+
+      - name: Upload frontend scan results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'frontend-trivy-results.sarif'
+
+      - name: Clean up scan images
+        if: always()
         run: |
-          # This would typically use a tool like Dependabot
-          # or create automated PRs for dependency updates
-          echo "🔄 Dependency update check completed"
-          echo "Consider enabling Dependabot for automated updates"
+          docker rmi  samarium-frontend-scan || true
 
-  # Docker image vulnerability scan
-  docker-security-scan:
+  docker-security-scan-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -99,11 +98,6 @@ jobs:
           cd backend
           docker build -t samarium-backend-scan .
 
-      - name: Build frontend image for scanning
-        run: |
-          cd frontend
-          docker build -t samarium-frontend-scan .
-
       - name: Scan backend image
         uses: aquasecurity/trivy-action@v0.35.0
         with:
@@ -112,27 +106,13 @@ jobs:
           format: 'sarif'
           output: 'backend-trivy-results.sarif'
 
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@v0.35.0
-        with:
-          scan-type: 'image'
-          scan-ref: 'samarium-frontend-scan'
-          format: 'sarif'
-          output: 'frontend-trivy-results.sarif'
-
       - name: Upload backend scan results
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'backend-trivy-results.sarif'
 
-      - name: Upload frontend scan results
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: 'frontend-trivy-results.sarif'
-
       - name: Clean up scan images
         if: always()
         run: |
-          docker rmi samarium-backend-scan samarium-frontend-scan || true
+          docker rmi samarium-backend-scan || true
