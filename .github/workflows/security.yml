@@ -54,38 +54,6 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  # Dependency updates
-  dependency-updates:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '25'
-
-      - name: Check for outdated dependencies (backend)
-        run: |
-          cd backend
-          echo "📦 Backend dependency status:"
-          npm outdated || true
-
-      - name: Check for outdated dependencies (frontend)
-        run: |
-          cd frontend
-          echo "📦 Frontend dependency status:"
-          npm outdated || true
-
-      - name: Create dependency update PR (if needed)
-        run: |
-          # This would typically use a tool like Dependabot
-          # or create automated PRs for dependency updates
-          echo "🔄 Dependency update check completed"
-          echo "Consider enabling Dependabot for automated updates"
-
   # Docker image vulnerability scan
   docker-security-scan:
     runs-on: ubuntu-latest
