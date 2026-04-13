@@ -119,7 +119,7 @@ This project includes comprehensive GitHub Actions workflows for automated testi
 ```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   GitHub        │    │   GitHub        │    │   Production    │
-│   Actions       │───▶│   Container     │───▶│   Server        │
+│   Actions       │--->│   Container     │--->│   Server        │
 │                 │    │   Registry      │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                  │                        │
@@ -409,6 +409,7 @@ GET /api/health
   "api": "Pokémon TCG Collection Tracker",
   "version": "1.0.0"
 }
+```
 
 More endpoints coming in Phase 2+
 
