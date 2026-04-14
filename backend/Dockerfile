@@ -46,6 +46,9 @@ COPY --chown=node:node --from=dependencies /app/package-lock.json .
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
 COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
 
+# Switch to non-root user for security best practices
+USER node
+
 # Install production deps only
 RUN npm ci --omit=dev && npm cache clean --force
 
@@ -55,9 +58,6 @@ RUN mkdir -p /app/images
 # Copy entrypoint script
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
-
-# Switch to non-root user for security best practices
-USER node
 
 # Expose port 3001 to allow API traffic
 EXPOSE 3001
