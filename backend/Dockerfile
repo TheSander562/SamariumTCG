@@ -53,11 +53,12 @@ RUN chmod +x ./docker-entrypoint.sh
 # Install production deps only
 RUN npm ci --omit=dev && npm cache clean --force
 
-# Switch to non-root user for security best practices
-USER node
-
 # Create images directory for caching
 RUN mkdir -p /app/images
+RUN chown node /app/images
+
+# Switch to non-root user for security best practices
+USER node
 
 # Expose port 3001 to allow API traffic
 EXPOSE 3001
