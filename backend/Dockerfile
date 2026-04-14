@@ -50,11 +50,11 @@ COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
-# Switch to non-root user for security best practices
-USER node
-
 # Install production deps only
 RUN npm ci --omit=dev && npm cache clean --force
+
+# Switch to non-root user for security best practices
+USER node
 
 # Create images directory for caching
 RUN mkdir -p /app/images
