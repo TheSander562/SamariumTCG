@@ -16,7 +16,7 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 
 # Install project dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci
 
 # Copy the files
 COPY prisma.config.ts ./
@@ -45,7 +45,6 @@ COPY --chown=node:node --from=dependencies /app/package.json .
 COPY --chown=node:node --from=dependencies /app/package-lock.json .
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
 COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
-COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
 
 # Copy entrypoint script
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
@@ -53,6 +52,9 @@ RUN chmod +x ./docker-entrypoint.sh
 
 # Switch to non-root user for security best practices
 USER node
+
+# Install production deps only
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Create images directory for caching
 RUN mkdir -p /app/images
