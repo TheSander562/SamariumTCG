@@ -12,11 +12,13 @@ RUN apt-get update -y && apt-get install -y openssl && apt-get clean && rm -rf /
 # Copy package json for npm install
 COPY package.json package-lock.json ./
 
+# Copy the prisma schema for the post install
+COPY prisma ./prisma
+
 # Install project dependencies
 RUN npm ci
 
 # Copy the files
-COPY prisma ./prisma
 COPY prisma.config.ts ./
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
