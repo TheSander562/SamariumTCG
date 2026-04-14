@@ -60,7 +60,7 @@ Authorization: Bearer <jwt-token>
 
 ### Prerequisites
 
-- Node.js 25+
+- Node.js 24+
 - Docker & Docker Compose
 - PostgreSQL 18
 
