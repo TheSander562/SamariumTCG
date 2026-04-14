@@ -54,11 +54,11 @@ RUN chmod +x ./docker-entrypoint.sh
 RUN npm ci --omit=dev && npm cache clean --force
 
 # Change ownership of the node_modules
-RUN chown node:node /app/node_modules
+RUN chown node:node -R /app/node_modules
 
 # Create images directory for caching
 RUN mkdir -p /app/images
-RUN chown node:node /app/images
+RUN chown node:node -R /app/images
 
 # Switch to non-root user for security best practices
 USER node
