@@ -7,7 +7,7 @@ FROM node:${NODE_VERSION} AS dependencies
 WORKDIR /app
 
 # Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy package json for npm install
 COPY package.json package-lock.json ./
@@ -16,7 +16,7 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 
 # Install project dependencies
-RUN npm ci
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy the files
 COPY prisma.config.ts ./
@@ -28,13 +28,13 @@ COPY src ./src
 RUN npm run build
 
 # ---- Runtime stage ----
-FROM node:${NODE_VERSION} AS builder
+FROM node:${NODE_VERSION} AS runtime
 
 # Set working directory
 WORKDIR /app
 
 # Install required binaries
-RUN apt-get update && apt-get install -y postgresql-client openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set production environment variables
 ENV NODE_ENV=production
@@ -45,19 +45,17 @@ COPY --chown=node:node --from=dependencies /app/package.json .
 COPY --chown=node:node --from=dependencies /app/package-lock.json .
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
 COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
+COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
+
+# Copy entrypoint script
+COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
 # Switch to non-root user for security best practices
 USER node
 
-# Install production deps only
-RUN npm ci --omit=dev && npm cache clean --force
-
 # Create images directory for caching
 RUN mkdir -p /app/images
-
-# Copy entrypoint script
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
 
 # Expose port 3001 to allow API traffic
 EXPOSE 3001
