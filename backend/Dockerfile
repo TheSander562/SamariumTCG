@@ -43,13 +43,11 @@ ENV NODE_ENV=production
 COPY --chown=node:node --from=dependencies /app/dist ./dist
 COPY --chown=node:node --from=dependencies /app/package.json .
 COPY --chown=node:node --from=dependencies /app/package-lock.json .
+COPY --chown=node:node --from=dependencies /app/prisma ./prisma
+COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
 
 # Install production deps only
 RUN npm ci --omit=dev && npm cache clean --force
-
-# Copy Prisma files + generated client
-COPY --chown=node:node --from=dependencies /app/prisma ./prisma
-COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
 
 # Create images directory for caching
 RUN mkdir -p /app/images
