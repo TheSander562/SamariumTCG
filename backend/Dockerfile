@@ -7,13 +7,15 @@ FROM node:${NODE_VERSION} AS dependencies
 WORKDIR /app
 
 # Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Copy package json for npm install
-COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  apt update && apt-get --no-install-recommends install -y openssl
 
 # Copy the prisma schema for the post install
 COPY prisma ./prisma
+
+# Copy package json for npm install
+COPY package*.json ./
 
 # Install project dependencies
 RUN npm ci
@@ -28,7 +30,7 @@ COPY src ./src
 RUN npm run build
 
 # Clean up dev dependencies after build
-RUN npm prune --omit=dev && npm cache clean
+RUN npm prune --omit=dev && npm cache clean --force
 
 # ---- Runtime stage ----
 FROM node:${NODE_VERSION} AS runtime
@@ -37,7 +39,9 @@ FROM node:${NODE_VERSION} AS runtime
 WORKDIR /app
 
 # Install required binaries
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  apt update && apt-get --no-install-recommends install -y postgresql-client openssl dumb-init
 
 # Set production environment variables
 ENV NODE_ENV=production
@@ -53,9 +57,6 @@ COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
 # Copy entrypoint script
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
-
-# Change ownership of the node_modules
-# RUN chown node:node -R /app/node_modules
 
 # Create images directory for caching
 RUN mkdir -p /app/images && mkdir -p /app/src
