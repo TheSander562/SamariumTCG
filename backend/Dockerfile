@@ -1,5 +1,5 @@
 # ---- Dependencies Installation Stage ----
-ARG NODE_VERSION=24-slim
+ARG NODE_VERSION=24-alpine
 
 FROM node:${NODE_VERSION} AS dependencies
 
@@ -7,9 +7,9 @@ FROM node:${NODE_VERSION} AS dependencies
 WORKDIR /app
 
 # Install OpenSSL for Prisma
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,target=/var/lib/apt,sharing=locked \
-  apt update && apt-get --no-install-recommends install -y openssl
+# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+#  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+#  apt update && apt-get --no-install-recommends install -y openssl
 
 # Copy the prisma schema for the post install
 COPY prisma ./prisma
@@ -39,9 +39,10 @@ FROM node:${NODE_VERSION} AS runtime
 WORKDIR /app
 
 # Install required binaries
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,target=/var/lib/apt,sharing=locked \
-  apt update && apt-get --no-install-recommends install -y postgresql-client openssl dumb-init
+# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+#  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+#  apt update && apt-get --no-install-recommends install -y postgresql-client openssl dumb-init
+RUN apk add --no-cache postgresql-client dumb-init
 
 # Set production environment variables
 ENV NODE_ENV=production
@@ -53,6 +54,7 @@ COPY --chown=node:node --from=dependencies /app/package-lock.json .
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
 COPY --chown=node:node --from=dependencies /app/prisma.config.ts .
 COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
+COPY --chown=node:node --from=dependencies /app/src ./src
 
 # Copy entrypoint script
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
