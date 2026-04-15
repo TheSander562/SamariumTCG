@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,9 +14,11 @@ async function bootstrap() {
     }),
   );
 
-  const configService = app.get(ConfigService);
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`✅ Application is running on http://localhost:${port}`);
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
+});
