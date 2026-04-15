@@ -12,7 +12,7 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key',
+      secret: process.env["JWT_SECRET"]!,
       signOptions: { expiresIn: '24h' },
     }),
   ],
