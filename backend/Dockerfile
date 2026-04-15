@@ -27,6 +27,9 @@ COPY src ./src
 # Build NestJS application
 RUN npm run build
 
+# Clean up dev dependencies after build
+RUN npm prune --omit=dev && npm cache clean
+
 # ---- Runtime stage ----
 FROM node:${NODE_VERSION} AS runtime
 
@@ -44,17 +47,15 @@ COPY --chown=node:node --from=dependencies /app/dist ./dist
 COPY --chown=node:node --from=dependencies /app/package.json .
 COPY --chown=node:node --from=dependencies /app/package-lock.json .
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
-COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
+COPY --chown=node:node --from=dependencies /app/prisma.config.ts .
+COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
 
 # Copy entrypoint script
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
-# Install production deps only
-RUN npm ci --omit=dev && npm cache clean --force
-
 # Change ownership of the node_modules
-RUN chown node:node -R /app/node_modules
+# RUN chown node:node -R /app/node_modules
 
 # Create images directory for caching
 RUN mkdir -p /app/images

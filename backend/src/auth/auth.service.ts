@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { User } from '../../dist/generated/prisma/client';
+import { User } from '../generated/prisma/client';
 import argon2 from 'argon2';
 
 export interface UserPayload {
