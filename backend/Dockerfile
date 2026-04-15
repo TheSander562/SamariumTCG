@@ -58,8 +58,8 @@ RUN chmod +x ./docker-entrypoint.sh
 # RUN chown node:node -R /app/node_modules
 
 # Create images directory for caching
-RUN mkdir -p /app/images
-RUN chown node:node -R /app/images
+RUN mkdir -p /app/images && mkdir -p /app/src
+RUN chown node:node -R /app/images && chown node:node -R /app/src
 
 # Switch to non-root user for security best practices
 USER node
