@@ -53,7 +53,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           cd backend
-          npm ci && npm run postinstall
+          npm ci
 
       - name: Install frontend dependencies
         run: |
