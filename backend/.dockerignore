@@ -4,6 +4,7 @@ node_modules
 build
 src/generated/prisma
 src/coverage
+tsconfig.build.tsbuildinfo
 
 # Logs
 logs

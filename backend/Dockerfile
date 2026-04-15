@@ -6,11 +6,6 @@ FROM node:${NODE_VERSION} AS dependencies
 # Set working directory
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-#  --mount=type=cache,target=/var/lib/apt,sharing=locked \
-#  apt update && apt-get --no-install-recommends install -y openssl
-
 # Copy the prisma schema for the post install
 COPY prisma ./prisma
 
@@ -26,11 +21,8 @@ COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
 
-# Build NestJS application
-RUN npm run build
-
-# Clean up dev dependencies after build
-RUN npm prune --omit=dev && npm cache clean --force
+# Build NestJS application and clean up dev dependencies after build
+RUN npm run build && npm prune --omit=dev
 
 # ---- Runtime stage ----
 FROM node:${NODE_VERSION} AS runtime
@@ -61,8 +53,7 @@ COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
 # Create images directory for caching
-RUN mkdir -p /app/images && mkdir -p /app/src
-RUN chown node:node -R /app/images && chown node:node -R /app/src
+RUN mkdir -p /app/images && chown node:node -R /app/images
 
 # Switch to non-root user for security best practices
 USER node
