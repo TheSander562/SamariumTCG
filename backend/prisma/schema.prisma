@@ -1,11 +1,16 @@
 // This is your Prisma schema file for Pokémon TCG Collection Tracker
-generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
-}
-
 datasource db {
   provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
+  binaryTargets = ["linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
+  compilerBuild = "small"
+  generatedFileExtension = "ts"
+  importFileExtension    = ""
 }
 
 // ============================================================================
@@ -15,23 +20,24 @@ datasource db {
 model User {
   id            String      @id @default(cuid())
   email         String      @unique
+  password      String
   name          String
-  
+
   // Preferences
   locale        String      @default("en")
   theme         String      @default("dark") // "dark" or "light"
-  
+
   // Authorization
   role          Role        @default(USER)
-  
+
   // OAuth
   oauthProvider String?
   oauthId       String?
-  
+
   // Relations
   collections   UserCollection[]
   binders       VirtualBinder[]
-  
+
   // Timestamps
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

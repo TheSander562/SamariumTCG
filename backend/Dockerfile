@@ -1,38 +1,40 @@
 # ---- Dependencies Installation Stage ----
-ARG NODE_VERSION=24-slim
+ARG NODE_VERSION=24-alpine
 
 FROM node:${NODE_VERSION} AS dependencies
 
 # Set working directory
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y openssl && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Copy the prisma schema for the post install
+COPY prisma ./prisma
 
 # Copy package json for npm install
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 # Install project dependencies
 RUN npm ci
 
 # Copy the files
-COPY prisma ./prisma
 COPY prisma.config.ts ./
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
 
-# Build NestJS application
-RUN npm run build
+# Build NestJS application and clean up dev dependencies after build
+RUN npm run build && npm prune --omit=dev
 
 # ---- Runtime stage ----
-FROM node:${NODE_VERSION} AS builder
+FROM node:${NODE_VERSION} AS runtime
 
 # Set working directory
 WORKDIR /app
 
 # Install required binaries
-RUN apt-get update && apt-get install -y postgresql-client openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
+# RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+#  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+#  apt update && apt-get --no-install-recommends install -y postgresql-client openssl dumb-init
+RUN apk add --no-cache postgresql-client dumb-init
 
 # Set production environment variables
 ENV NODE_ENV=production
@@ -41,20 +43,17 @@ ENV NODE_ENV=production
 COPY --chown=node:node --from=dependencies /app/dist ./dist
 COPY --chown=node:node --from=dependencies /app/package.json .
 COPY --chown=node:node --from=dependencies /app/package-lock.json .
-
-# Install production deps only
-RUN npm ci --omit=dev && npm cache clean --force
-
-# Copy Prisma files + generated client
 COPY --chown=node:node --from=dependencies /app/prisma ./prisma
-COPY --chown=node:node --from=dependencies /app/prisma.config.ts ./
-
-# Create images directory for caching
-RUN mkdir -p /app/images
+COPY --chown=node:node --from=dependencies /app/prisma.config.ts .
+COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules
+COPY --chown=node:node --from=dependencies /app/src ./src
 
 # Copy entrypoint script
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
+COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
+
+# Create images directory for caching
+RUN mkdir -p /app/images && chown node:node -R /app/images
 
 # Switch to non-root user for security best practices
 USER node

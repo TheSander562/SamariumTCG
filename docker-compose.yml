@@ -16,7 +16,7 @@ services:
 
   # NestJS Backend API
   samariumtcg-backend:
-    image: ghcr.io/thesander562/samariumtcg/backend:main
+    image: ghcr.io/thesander562/samariumtcg/backend:pr-24
     container_name: samariumtcg-backend
     depends_on:
       samariumtcg-postgres:
