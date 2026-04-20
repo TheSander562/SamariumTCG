@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.99.2",
-    "axios": "^1.15.0",
+    "axios": "^1.15.1",
     "jspdf": "^4.2.1",
     "next": "16.2.3",
     "next-intl": "^4.9.1",
