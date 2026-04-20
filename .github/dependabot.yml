@@ -4,9 +4,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/backend"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "02:00"
+      interval: "daily"
     open-pull-requests-limit: 10
     reviewers:
       - "TheSander562"
@@ -16,14 +14,19 @@ updates:
       prefix: "deps"
       prefix-development: "deps-dev"
       include: "scope"
+    groups:
+      # All patch updates together, may be merged when CI is green.
+      patch-updates:
+        update-types: ["patch"]
+      # All minor updates together. Requires green CI + manual check.
+      minor-updates:
+        update-types: ["minor"]
 
   # Frontend dependencies
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "02:00"
+      interval: "daily"
     open-pull-requests-limit: 10
     reviewers:
       - "TheSander562"
@@ -33,14 +36,19 @@ updates:
       prefix: "deps"
       prefix-development: "deps-dev"
       include: "scope"
+    groups:
+      # All patch updates together, may be merged when CI is green.
+      patch-updates:
+        update-types: ["patch"]
+      # All minor updates together. Requires green CI + manual check.
+      minor-updates:
+        update-types: ["minor"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "02:00"
+      interval: "daily"
     open-pull-requests-limit: 5
     reviewers:
       - "TheSander562"
