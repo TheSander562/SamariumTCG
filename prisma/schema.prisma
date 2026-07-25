@@ -1,0 +1,163 @@
+// Pokémon TCG Collection Tracker — data model (incremental; expand per roadmap)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Auth.js (NextAuth) ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  theme         Theme     @default(SYSTEM)
+  locale        String    @default("en")
+  role          UserRole  @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+  collection    CollectionItem[]
+  binders       Binder[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// --- Card catalog (synced from external API / admin) ---
+
+model Expansion {
+  id          String    @id @default(cuid())
+  externalId  String    @unique
+  code        String?
+  name        String
+  series      String?
+  releaseDate DateTime?
+  totalCards  Int       @default(0)
+  cards       Card[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+}
+
+model Card {
+  id              String           @id @default(cuid())
+  externalId      String           @unique
+  expansionId     String
+  expansion       Expansion        @relation(fields: [expansionId], references: [id], onDelete: Cascade)
+  name            String
+  number          String?
+  rarity          String?
+  supertype       String?
+  hp              Int?
+  types           String[]
+  artist          String?
+  imageUrl        String?
+  imageCachedPath String?
+  collectionItems CollectionItem[]
+  binderSlots     BinderSlot[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([name])
+  @@index([expansionId, number])
+  @@index([rarity])
+}
+
+// --- User collection ---
+
+model CollectionItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  condition String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, cardId])
+  @@index([userId])
+}
+
+// --- Virtual binders ---
+
+model Binder {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  slots       BinderSlot[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+}
+
+model BinderSlot {
+  id       String  @id @default(cuid())
+  binderId String
+  binder   Binder  @relation(fields: [binderId], references: [id], onDelete: Cascade)
+  cardId   String?
+  card     Card?   @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  page     Int     @default(0)
+  slot     Int     @default(0)
+
+  @@unique([binderId, page, slot])
+  @@index([binderId])
+}
