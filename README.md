@@ -492,5 +492,6 @@ Major-version bumps that cannot land today because a transitive plugin in our ES
 | Package | Stuck on | Blocker | Re-evaluate when | Tracking |
 | --- | --- | --- | --- | --- |
 | `eslint` | `^9.x` | `eslint-plugin-react@7.37.5` peer caps at `^9.7`; ESLint 10 also removed the `RuleContext` API the plugin uses (upstream PRs [jsx-eslint/eslint-plugin-react#3972](https://github.com/jsx-eslint/eslint-plugin-react/pull/3972), [#3979](https://github.com/jsx-eslint/eslint-plugin-react/pull/3979) open, no release). `@eslint/js` would also need a sibling bump. | `eslint-plugin-react@8` (or successor with `eslint: "^10"` peer) is published. | PR [#132](https://github.com/TheSander562/SamariumTCG/pull/132) closed via `@dependabot ignore this major version`. |
+| `typescript-eslint` | `^6.X` | `typescript@^6.0.3` peer caps at `^6.0.3`; | `typescript@^7.1` (or successor) is published. | PR [#116](https://github.com/TheSander562/SamariumTCG/pull/116),[#119](https://github.com/TheSander562/SamariumTCG/pull/119) closed via `@dependabot ignore this major version`. |
 
 When an entry's blocker clears: remove the row, drop the corresponding `ignore` from `.github/dependabot.yml` (if one was added there as a belt-and-braces alongside the PR-comment ignore), and let Dependabot reopen the bump. The upgrade itself ships in its own PR, not bundled with unrelated changes.
