@@ -2,6 +2,13 @@
 
 A self-hosted web application to track your Pokémon Trading Card Game collection with detailed analytics, virtual binders, and collection management features.
 
+Check:
+https://dev.to/nadim_ch0wdhury/how-to-create-restful-api-in-nest-js-step-by-step-guidelines-5eg9
+https://samariumtcg.onrender.com/api/health
+https://dev.to/manuchehr/dockerize-nestjs-app-with-postgres-redis-prisma-orm-1130
+https://snyk.io/blog/10-best-practices-to-containerize-nodejs-web-applications-with-docker/
+https://blog.lorenzoregalado.com/5-steps-to-ship-your-nestjs-prisma-in-docker
+
 ## 🎯 Features (Planned)
 
 - **Collection Management**: Track cards, quantities, and collection numbers
