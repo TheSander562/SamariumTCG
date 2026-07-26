@@ -3,7 +3,9 @@ import type { NextAuthConfig } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
+
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
 function optionalGoogle() {
   const clientId = process.env.AUTH_GOOGLE_ID;
@@ -20,7 +22,7 @@ function optionalGitHub() {
 }
 
 export const authConfig = {
-  adapter: PrismaAdapter(prisma),
+  adapter: isBuildPhase ? undefined : PrismaAdapter(getPrisma()),
   providers: [optionalGoogle(), optionalGitHub()].filter(
     (provider): provider is NonNullable<typeof provider> => provider !== null,
   ),
@@ -28,7 +30,7 @@ export const authConfig = {
     signIn: "/login",
   },
   session: {
-    strategy: "database",
+    strategy: isBuildPhase ? "jwt" : "database",
   },
   callbacks: {
     session({ session, user }) {
