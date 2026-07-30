@@ -58,7 +58,7 @@ USER node
 
 # Add healthcheck to ensure the application is running and responsive
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Start Next.js standalone application
 ENTRYPOINT ["/entrypoint.sh"]
