@@ -41,18 +41,18 @@ Open the app at:
 
 1. Start PostgreSQL only:
 
-```bash
-docker compose up -d db
-```
+   ```bash
+   docker compose up -d db
+   ```
 
 2. Install dependencies and apply migrations:
 
-```bash
-cp .env.example .env
-npm install
-npm run db:migrate
-npm run dev
-```
+   ```bash
+   cp .env.example .env
+   npm install
+   npm run db:migrate
+   npm run dev
+   ```
 
 ## Environment
 
