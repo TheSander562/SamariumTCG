@@ -3,7 +3,7 @@ set -e
 
 if [ -n "$DATABASE_URL" ]; then
   echo "Applying database migrations..."
-  npx prisma migrate deploy
+  npx --no-update-notifier prisma migrate deploy
 fi
 
 exec "$@"
