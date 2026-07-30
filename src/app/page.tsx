@@ -23,7 +23,7 @@ export default async function Home() {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-red-600">
-              Pokémon TCG
+              SamariumTCG
             </p>
             <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
               Collection Tracker
