@@ -9,3 +9,4 @@ npm-debug.log*
 .env.local
 !.env.example
 /src/generated
+.github
