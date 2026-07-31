@@ -45,7 +45,10 @@ yarn-error.log*
 next-env.d.ts
 
 # AI agents
+.agent
 .agents
 .claude
 .windsurf
 skills-lock.json
+AGENTS.md
+CLAUDE.md
