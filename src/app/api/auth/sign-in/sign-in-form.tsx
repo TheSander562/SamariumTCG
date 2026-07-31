@@ -132,7 +132,7 @@ export default function SignInForm({
       )}
 
       <p className="text-sm text-neutral-400">
-        Don't have an account?&nbsp;
+        Don&apos;t have an account?&nbsp;
         <Link
           href="/auth/sign-up"
           className="text-white hover:underline"
