@@ -2,6 +2,11 @@
 
 A self-hosted web application to track your Trading Card Game collection with detailed analytics, virtual binders andcollection management.
 
+## Features (Implemented)
+
+- **Website using docker**: Through docker compose port 3000 can be opened
+- **Multi-Account Support**: OAuth2 SSO (Authelia tested but if supporting OIDC then it should be supported)
+
 ## Features (Planned)
 
 - **Collection Management**: Track cards, quantities, and collection numbers
@@ -10,7 +15,6 @@ A self-hosted web application to track your Trading Card Game collection with de
 - **Virtual Binders**: Create custom binders for organization and viewing
 - **Statistics Dashboard**: Total progress, rarity breakdown, and detailed analytics
 - **Dark/Light Themes**: Customizable per user profile
-- **Multi-Account Support**: OAuth2 SSO (Google, GitHub, extensible)
 - **Data Export**: CSV and PDF export of collections and checklists
 - **Admin Panel**: Manage users, sync card data, configure backups
 - **Backup & Restore**: Selective backup of collections, users, cards, images, and system data
@@ -65,10 +69,12 @@ DATABASE_URL="postgresql://samariumtcg:samariumtcg@localhost:5432/samariumtcg"
 AUTH_SECRET="change-me-generate-with-openssl-rand-base64-32"
 AUTH_URL="http://localhost:3000"
 # OAuth
-# AUTH_GOOGLE_ID=""
-# AUTH_GOOGLE_SECRET=""
-# AUTH_GITHUB_ID=""
-# AUTH_GITHUB_SECRET=""
+# AUTH_OIDC_PROVIDER_ID="authelia"
+# AUTH_OIDC_NAME="Authelia"
+# AUTH_OIDC_CLIENT_ID=""
+# AUTH_OIDC_CLIENT_SECRET=""
+# AUTH_OIDC_ISSUER="https://your-identity-provider.example.com"
+# AUTH_OIDC_SCOPE="openid profile email" # Default , not needed if this is all its needed
 ```
 
 ## Stack

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pokémon TCG Collection Tracker",
+  title: "SamariumTCG - Pokemon Collection Tracker",
   description:
     "Self-hosted web app to track your Pokémon Trading Card Game collection.",
 };

@@ -7,58 +7,76 @@ CREATE TYPE "Theme" AS ENUM ('LIGHT', 'DARK', 'SYSTEM');
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 
+
+-- =========================
+-- Better Auth tables
+-- =========================
+
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE "user" (
     "id" TEXT NOT NULL,
-    "name" TEXT,
+    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "emailVerified" TIMESTAMP(3),
+    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "image" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "theme" "Theme" NOT NULL DEFAULT 'SYSTEM',
     "locale" TEXT NOT NULL DEFAULT 'en',
     "role" "UserRole" NOT NULL DEFAULT 'USER',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Account" (
-    "userId" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
-    "provider" TEXT NOT NULL,
-    "providerAccountId" TEXT NOT NULL,
-    "refresh_token" TEXT,
-    "access_token" TEXT,
-    "expires_at" INTEGER,
-    "token_type" TEXT,
-    "scope" TEXT,
-    "id_token" TEXT,
-    "session_state" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Account_pkey" PRIMARY KEY ("provider","providerAccountId")
-);
-
--- CreateTable
-CREATE TABLE "Session" (
-    "sessionToken" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL
-);
-
--- CreateTable
-CREATE TABLE "VerificationToken" (
-    "identifier" TEXT NOT NULL,
+CREATE TABLE "session" (
+    "id" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
     "token" TEXT NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "ipAddress" TEXT,
+    "userAgent" TEXT,
+    "userId" TEXT NOT NULL,
 
-    CONSTRAINT "VerificationToken_pkey" PRIMARY KEY ("identifier","token")
+    CONSTRAINT "session_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateTable
+CREATE TABLE "account" (
+    "id" TEXT NOT NULL,
+    "accountId" TEXT NOT NULL,
+    "providerId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "accessToken" TEXT,
+    "refreshToken" TEXT,
+    "idToken" TEXT,
+    "accessTokenExpiresAt" TIMESTAMP(3),
+    "refreshTokenExpiresAt" TIMESTAMP(3),
+    "scope" TEXT,
+    "password" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "account_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "verification" (
+    "id" TEXT NOT NULL,
+    "identifier" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "verification_pkey" PRIMARY KEY ("id")
+);
+
+
+-- =========================
+-- Application tables
+-- =========================
 
 -- CreateTable
 CREATE TABLE "Expansion" (
@@ -132,65 +150,116 @@ CREATE TABLE "BinderSlot" (
     CONSTRAINT "BinderSlot_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
--- CreateIndex
-CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
+-- =========================
+-- Indexes
+-- =========================
 
--- CreateIndex
-CREATE UNIQUE INDEX "Expansion_externalId_key" ON "Expansion"("externalId");
+CREATE UNIQUE INDEX "user_email_key"
+ON "user"("email");
 
--- CreateIndex
-CREATE INDEX "Expansion_name_idx" ON "Expansion"("name");
+CREATE UNIQUE INDEX "session_token_key"
+ON "session"("token");
 
--- CreateIndex
-CREATE UNIQUE INDEX "Card_externalId_key" ON "Card"("externalId");
+CREATE INDEX "session_userId_idx"
+ON "session"("userId");
 
--- CreateIndex
-CREATE INDEX "Card_name_idx" ON "Card"("name");
+CREATE INDEX "account_userId_idx"
+ON "account"("userId");
 
--- CreateIndex
-CREATE INDEX "Card_expansionId_number_idx" ON "Card"("expansionId", "number");
+CREATE INDEX "verification_identifier_idx"
+ON "verification"("identifier");
 
--- CreateIndex
-CREATE INDEX "Card_rarity_idx" ON "Card"("rarity");
+CREATE UNIQUE INDEX "Expansion_externalId_key"
+ON "Expansion"("externalId");
 
--- CreateIndex
-CREATE INDEX "CollectionItem_userId_idx" ON "CollectionItem"("userId");
+CREATE INDEX "Expansion_name_idx"
+ON "Expansion"("name");
 
--- CreateIndex
-CREATE UNIQUE INDEX "CollectionItem_userId_cardId_key" ON "CollectionItem"("userId", "cardId");
+CREATE UNIQUE INDEX "Card_externalId_key"
+ON "Card"("externalId");
 
--- CreateIndex
-CREATE INDEX "Binder_userId_idx" ON "Binder"("userId");
+CREATE INDEX "Card_name_idx"
+ON "Card"("name");
 
--- CreateIndex
-CREATE INDEX "BinderSlot_binderId_idx" ON "BinderSlot"("binderId");
+CREATE INDEX "Card_expansionId_number_idx"
+ON "Card"("expansionId", "number");
 
--- CreateIndex
-CREATE UNIQUE INDEX "BinderSlot_binderId_page_slot_key" ON "BinderSlot"("binderId", "page", "slot");
+CREATE INDEX "Card_rarity_idx"
+ON "Card"("rarity");
 
--- AddForeignKey
-ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "CollectionItem_userId_idx"
+ON "CollectionItem"("userId");
 
--- AddForeignKey
-ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE UNIQUE INDEX "CollectionItem_userId_cardId_key"
+ON "CollectionItem"("userId", "cardId");
 
--- AddForeignKey
-ALTER TABLE "Card" ADD CONSTRAINT "Card_expansionId_fkey" FOREIGN KEY ("expansionId") REFERENCES "Expansion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "Binder_userId_idx"
+ON "Binder"("userId");
 
--- AddForeignKey
-ALTER TABLE "CollectionItem" ADD CONSTRAINT "CollectionItem_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "BinderSlot_binderId_idx"
+ON "BinderSlot"("binderId");
 
--- AddForeignKey
-ALTER TABLE "CollectionItem" ADD CONSTRAINT "CollectionItem_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES "Card"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE UNIQUE INDEX "BinderSlot_binderId_page_slot_key"
+ON "BinderSlot"("binderId", "page", "slot");
 
--- AddForeignKey
-ALTER TABLE "Binder" ADD CONSTRAINT "Binder_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- AddForeignKey
-ALTER TABLE "BinderSlot" ADD CONSTRAINT "BinderSlot_binderId_fkey" FOREIGN KEY ("binderId") REFERENCES "Binder"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- =========================
+-- Foreign keys
+-- =========================
 
--- AddForeignKey
-ALTER TABLE "BinderSlot" ADD CONSTRAINT "BinderSlot_cardId_fkey" FOREIGN KEY ("cardId") REFERENCES "Card"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "session"
+ADD CONSTRAINT "session_userId_fkey"
+FOREIGN KEY ("userId")
+REFERENCES "user"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "account"
+ADD CONSTRAINT "account_userId_fkey"
+FOREIGN KEY ("userId")
+REFERENCES "user"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "Card"
+ADD CONSTRAINT "Card_expansionId_fkey"
+FOREIGN KEY ("expansionId")
+REFERENCES "Expansion"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "CollectionItem"
+ADD CONSTRAINT "CollectionItem_userId_fkey"
+FOREIGN KEY ("userId")
+REFERENCES "user"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "CollectionItem"
+ADD CONSTRAINT "CollectionItem_cardId_fkey"
+FOREIGN KEY ("cardId")
+REFERENCES "Card"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "Binder"
+ADD CONSTRAINT "Binder_userId_fkey"
+FOREIGN KEY ("userId")
+REFERENCES "user"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "BinderSlot"
+ADD CONSTRAINT "BinderSlot_binderId_fkey"
+FOREIGN KEY ("binderId")
+REFERENCES "Binder"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "BinderSlot"
+ADD CONSTRAINT "BinderSlot_cardId_fkey"
+FOREIGN KEY ("cardId")
+REFERENCES "Card"("id")
+ON DELETE SET NULL
+ON UPDATE CASCADE;
