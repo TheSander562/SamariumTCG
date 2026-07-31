@@ -31,11 +31,11 @@ function createPrismaClient(): PrismaClient {
 }
 
 export function getPrisma(): PrismaClient {
-  const prisma = globalForPrisma.prisma ?? createPrismaClient();
+  const db = globalForPrisma.prisma ?? createPrismaClient();
 
   if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = prisma;
+    globalForPrisma.prisma = db;
   }
 
-  return prisma;
+  return db;
 }

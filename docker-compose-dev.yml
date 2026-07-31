@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: samariumtcg
+      POSTGRES_PASSWORD: samariumtcg
+      POSTGRES_DB: samariumtcg
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U samariumtcg -d samariumtcg"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://samariumtcg:samariumtcg@db:5432/samariumtcg
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-generate-with-openssl-rand-base64-32}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      AUTH_OIDC_PROVIDER_ID: ${AUTH_OIDC_PROVIDER_ID}
+      AUTH_OIDC_NAME: ${AUTH_OIDC_NAME}
+      AUTH_OIDC_CLIENT_ID: ${AUTH_OIDC_CLIENT_ID}
+      AUTH_OIDC_CLIENT_SECRET: ${AUTH_OIDC_CLIENT_SECRET}
+      AUTH_OIDC_ISSUER: ${AUTH_OIDC_ISSUER}
+      AUTH_OIDC_SCOPE: ${AUTH_OIDC_SCOPE}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

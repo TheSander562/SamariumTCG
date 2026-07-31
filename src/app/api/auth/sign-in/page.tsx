@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getAuth } from "@/lib/auth";
-import SignInForm from "@/app/sign-in/sign-in-form";
+
+import SignInForm from "@/app/api/auth/sign-in/sign-in-form";
 
 export const dynamic = "force-dynamic";
 
@@ -14,5 +15,12 @@ export default async function SignInPage() {
     redirect("/dashboard");
   }
 
-  return <SignInForm />;
+  return (
+    <SignInForm
+      oidcEnabled={!!process.env.AUTH_OIDC_PROVIDER_ID}
+      oidcProviderId={process.env.AUTH_OIDC_PROVIDER_ID ?? ""}
+      oidcName={process.env.AUTH_OIDC_NAME ?? "Single Sign-On"}
+      oidcLoginOnly={process.env.AUTH_OIDC_LOGIN_ONLY === "true"}
+    />
+  );
 }

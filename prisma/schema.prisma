@@ -96,6 +96,7 @@ model BinderSlot {
   @@index([binderId])
 }
 // --- User setup ---
+
 enum UserRole {
   USER
   ADMIN
@@ -110,20 +111,22 @@ enum Theme {
 // --- BetterAuth ---
 
 model User {
-  id            String    @id
+  id            String           @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean          @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   sessions      Session[]
   accounts      Account[]
-  theme         Theme     @default(SYSTEM)
-  locale        String    @default("en")
-  role          UserRole  @default(USER)
+  theme         Theme            @default(SYSTEM)
+  locale        String           @default("en")
+  role          UserRole         @default(USER)
   collection    CollectionItem[]
   binders       Binder[]
+
+  passkeys Passkey[]
 
   @@unique([email])
   @@map("user")
@@ -175,4 +178,23 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Passkey {
+  id           String    @id
+  name         String?
+  publicKey    String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialID String
+  counter      Int
+  deviceType   String
+  backedUp     Boolean
+  transports   String?
+  createdAt    DateTime?
+  aaguid       String?
+
+  @@index([userId])
+  @@index([credentialID])
+  @@map("passkey")
 }
