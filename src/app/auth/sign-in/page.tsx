@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getAuth } from "@/lib/auth";
 
-import SignInForm from "@/app/api/auth/sign-in/sign-in-form";
+import SignInForm from "@/app/auth/sign-in/sign-in-form";
 
 export const dynamic = "force-dynamic";
 

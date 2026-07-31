@@ -1,6 +1,6 @@
 services:
   samariumtcg:
-    image: ghcr.io/thesander562/samariumtcg:latest
+    image: ghcr.io/thesander562/samariumtcg:pr-135
     container_name: samariumtcg
     depends_on:
       samariumtcg-postgres:
