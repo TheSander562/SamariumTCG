@@ -84,7 +84,7 @@ export default async function Home() {
           <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-zinc-600">
             <li>Next.js App Router + TypeScript + Tailwind CSS</li>
             <li>PostgreSQL + Prisma ORM</li>
-            <li>Better Auth + Authelia OIDC</li>
+            <li>Better Auth + OIDC</li>
             <li>Docker Compose for self-hosting</li>
           </ul>
         </section>
