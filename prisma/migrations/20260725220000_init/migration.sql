@@ -24,6 +24,7 @@ CREATE TABLE "user" (
     "theme" "Theme" NOT NULL DEFAULT 'SYSTEM',
     "locale" TEXT NOT NULL DEFAULT 'en',
     "role" "UserRole" NOT NULL DEFAULT 'USER',
+    "twoFactorEnabled" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -88,6 +89,19 @@ CREATE TABLE "passkey" (
     "aaguid" TEXT,
 
     CONSTRAINT "passkey_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "twoFactor" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "secret" TEXT NOT NULL,
+    "backupCodes" TEXT NOT NULL,
+    "verified" BOOLEAN NOT NULL DEFAULT false,
+    "failedVerificationCount" INTEGER NOT NULL DEFAULT 0,
+    "lockedUntil" TIMESTAMP(3),
+
+    CONSTRAINT "twoFactor_pkey" PRIMARY KEY ("id")
 );
 
 -- =========================
@@ -192,6 +206,9 @@ ON "passkey"("userId");
 CREATE INDEX "passkey_credentialID_idx"
 ON "passkey"("credentialID");
 
+CREATE INDEX "twoFactor_userId_idx"
+ON "twoFactor"("userId");
+
 CREATE UNIQUE INDEX "Expansion_externalId_key"
 ON "Expansion"("externalId");
 
@@ -246,6 +263,13 @@ ON UPDATE CASCADE;
 
 ALTER TABLE "passkey"
 ADD CONSTRAINT "passkey_userId_fkey"
+FOREIGN KEY ("userId")
+REFERENCES "user"("id")
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE "twoFactor"
+ADD CONSTRAINT "twoFactor_userId_fkey"
 FOREIGN KEY ("userId")
 REFERENCES "user"("id")
 ON DELETE CASCADE

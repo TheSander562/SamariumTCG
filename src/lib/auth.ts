@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth/minimal";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { genericOAuth } from "better-auth/plugins";
+import { genericOAuth, twoFactor } from "better-auth/plugins";
 import { passkey } from "@better-auth/passkey"
 import { getPrisma } from "@/lib/prisma";
 
@@ -9,11 +9,51 @@ export function getAuth() {
     database: prismaAdapter(getPrisma(), {
       provider: "postgresql",
     }),
+    appName: "SamariumTCG",
     emailAndPassword: {
       enabled: true,
+      resetPasswordTokenExpiresIn: 60 * 60, // 1 hour
+      sendResetPassword: async ({user, url}) => {
+        // await sendResetPasswordEmail(
+        // 	user.name,
+        //   user.email,
+        //   url,
+        // );
+        return;
+      },
+    },
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 60,
+      },
     },
     plugins: [
-      passkey(),
+      twoFactor({
+        issuer: "SamariumTCG",
+        otpOptions: {
+          period: 60, // seconds
+          sendOTP: async ({ user, otp }) => {
+            // await sendOTPEmail(
+            // 	user.email,
+            // 	otp,
+            // );
+            return;
+          },
+        },
+        totpOptions: {
+          period: 30, // seconds
+          digits: 6,
+        },
+        backupCodeOptions: {
+          amount: 0,
+        }
+      }),
+      passkey({
+        rpID: new URL(process.env.BETTER_AUTH_URL!).hostname,
+        rpName: "SamariumTCG",
+        origin: process.env.BETTER_AUTH_URL,
+      }),
       genericOAuth({
         config: [
           {

@@ -103,6 +103,7 @@ export default function SignInForm({
 
           <form
             onSubmit={handleSubmit}
+            method="post"
             className="w-full space-y-4"
           >
             <input

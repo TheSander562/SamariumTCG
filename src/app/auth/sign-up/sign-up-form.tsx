@@ -95,6 +95,7 @@ export default function SignUpForm({
 
           <form
             onSubmit={handleSubmit}
+            method="post"
             className="w-full space-y-4"
           >
             <input
