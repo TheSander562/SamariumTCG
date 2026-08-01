@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main, 'feature/**']
+    tags: ['v*']
     paths:
       - '*.json'
       - '*.mjs'
@@ -14,9 +15,6 @@ on:
       - 'prisma/**'
       - 'public/**'
       - 'src/**'
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       reason:
@@ -35,7 +33,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     services:
       postgres:
         image: postgres:18-alpine
