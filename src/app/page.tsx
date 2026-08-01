@@ -1,6 +1,8 @@
-import Link from "next/link";
+import { headers } from "next/headers";
+import { getAuth } from "@/lib/auth";
+import { LandingButtons } from "@/app/landing-buttons";
 
-import { auth, signOut } from "@/auth";
+export const dynamic = "force-dynamic";
 
 const roadmap = [
   { phase: 1, title: "Collection CRUD", status: "planned" as const },
@@ -15,7 +17,9 @@ const roadmap = [
 ];
 
 export default async function Home() {
-  const session = await auth();
+  const session = await getAuth().api.getSession({
+    headers: await headers(),
+  });
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
@@ -29,34 +33,9 @@ export default async function Home() {
               Collection Tracker
             </h1>
           </div>
-          <nav className="flex items-center gap-3 text-sm">
-            {session?.user ? (
-              <>
-                <span className="hidden text-zinc-600 sm:inline dark:text-zinc-400">
-                  {session.user.email}
-                </span>
-                <form
-                  action={async () => {
-                    "use server";
-                    await signOut({ redirectTo: "/" });
-                  }}
-                >
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-zinc-300 px-3 py-1.5 font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                  >
-                    Sign out
-                  </button>
-                </form>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-lg bg-red-600 px-3 py-1.5 font-medium text-white hover:bg-red-700"
-              >
-                Sign in
-              </Link>
-            )}
+
+          <nav className="flex items-center gap-3">
+            <LandingButtons session={session}/>
           </nav>
         </div>
       </header>
@@ -66,54 +45,46 @@ export default async function Home() {
           <h2 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
             Self-hosted collection management
           </h2>
+
           <p className="mt-3 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
             Track cards, quantities, set completion, virtual binders, and
-            analytics. This repository is scaffolded for incremental delivery in
-            git — one feature slice at a time.
+            analytics.
           </p>
-          {!session?.user && (
-            <p className="mt-4 text-sm text-zinc-500">
-              Foundation is running.{" "}
-              <Link href="/login" className="text-red-600 underline-offset-4 hover:underline">
-                Sign in
-              </Link>{" "}
-              once OAuth is configured.
-            </p>
-          )}
         </section>
 
         <section>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
             Delivery roadmap
           </h3>
+
           <ol className="mt-4 grid gap-3 sm:grid-cols-2">
             {roadmap.map((item) => (
               <li
                 key={item.phase}
                 className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-sm font-medium text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-sm font-medium dark:bg-zinc-900">
                   {item.phase}
                 </span>
+
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-50">
-                    {item.title}
+                  <p className="font-medium">{item.title}</p>
+                  <p className="text-xs capitalize text-zinc-500">
+                    {item.status}
                   </p>
-                  <p className="text-xs capitalize text-zinc-500">{item.status}</p>
                 </div>
               </li>
             ))}
           </ol>
         </section>
 
-        <section className="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
-          <p className="font-medium text-zinc-900 dark:text-zinc-200">
-            Stack (foundation)
-          </p>
-          <ul className="mt-2 list-inside list-disc space-y-1">
+        <section className="rounded-xl border border-dashed border-zinc-300 p-6">
+          <p className="font-medium">Stack</p>
+
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-zinc-600">
             <li>Next.js App Router + TypeScript + Tailwind CSS</li>
             <li>PostgreSQL + Prisma ORM</li>
-            <li>Auth.js (NextAuth v5) with Google / GitHub OAuth</li>
+            <li>Better Auth + OIDC</li>
             <li>Docker Compose for self-hosting</li>
           </ul>
         </section>

@@ -1,7 +1,27 @@
 services:
-  db:
-    image: postgres:18-alpine
+  samariumtcg:
+    image: ghcr.io/thesander562/samariumtcg:latest
+    container_name: samariumtcg
+    depends_on:
+      samariumtcg-postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://samariumtcg:samariumtcg@samariumtcg-postgres:5432/samariumtcg
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-generate-with-openssl-rand-base64-32}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      AUTH_OIDC_PROVIDER_ID: ${AUTH_OIDC_PROVIDER_ID}
+      AUTH_OIDC_NAME: ${AUTH_OIDC_NAME}
+      AUTH_OIDC_CLIENT_ID: ${AUTH_OIDC_CLIENT_ID}
+      AUTH_OIDC_CLIENT_SECRET: ${AUTH_OIDC_CLIENT_SECRET}
+      AUTH_OIDC_ISSUER: ${AUTH_OIDC_ISSUER}
+      AUTH_OIDC_SCOPE: ${AUTH_OIDC_SCOPE}
     restart: unless-stopped
+
+  samariumtcg-postgres:
+    image: postgres:18-alpine
+    container_name: samariumtcg-postgres
     environment:
       POSTGRES_USER: samariumtcg
       POSTGRES_PASSWORD: samariumtcg
@@ -15,25 +35,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://samariumtcg:samariumtcg@db:5432/samariumtcg
-      AUTH_SECRET: ${AUTH_SECRET:-change-me-generate-with-openssl-rand-base64-32}
-      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
-      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
-      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
-      AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}
-      AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}
-    depends_on:
-      db:
-        condition: service_healthy
 
 volumes:
   postgres_data:

@@ -10,3 +10,10 @@ npm-debug.log*
 !.env.example
 /src/generated
 .github
+.agent
+.agents
+.claude
+.windsurf
+skills-lock.json
+AGENTS.md
+CLAUDE.md

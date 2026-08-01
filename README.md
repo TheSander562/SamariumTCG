@@ -2,15 +2,20 @@
 
 A self-hosted web application to track your Trading Card Game collection with detailed analytics, virtual binders andcollection management.
 
+## Features (Implemented)
+
+- **Website using docker**: Through docker compose port 3000 can be opened
+- **Multi-Account/Login Support**: Local login + TOTP + Passkeys + OAuth SSO (Authelia tested but supporting many OIDC providers)
+
 ## Features (Planned)
 
+- **Email capabilities**: Send email notifications and reset password emails
 - **Collection Management**: Track cards, quantities, and collection numbers
 - **Expansion Overview**: View sets with completion progress and checklists
 - **Advanced Search**: Filter by name, type, rarity, HP, artist, and ownership status
 - **Virtual Binders**: Create custom binders for organization and viewing
 - **Statistics Dashboard**: Total progress, rarity breakdown, and detailed analytics
 - **Dark/Light Themes**: Customizable per user profile
-- **Multi-Account Support**: OAuth2 SSO (Google, GitHub, extensible)
 - **Data Export**: CSV and PDF export of collections and checklists
 - **Admin Panel**: Manage users, sync card data, configure backups
 - **Backup & Restore**: Selective backup of collections, users, cards, images, and system data
@@ -62,13 +67,20 @@ Example values in `.env.example`:
 
 ```env
 DATABASE_URL="postgresql://samariumtcg:samariumtcg@localhost:5432/samariumtcg"
-AUTH_SECRET="change-me-generate-with-openssl-rand-base64-32"
-AUTH_URL="http://localhost:3000"
-# OAuth
-# AUTH_GOOGLE_ID=""
-# AUTH_GOOGLE_SECRET=""
-# AUTH_GITHUB_ID=""
-# AUTH_GITHUB_SECRET=""
+# Generate: openssl rand -base64 32
+BETTER_AUTH_SECRET="change-me-generate-with-openssl-rand-base64-32"
+BETTER_AUTH_URL=http://localhost:3000  # Public URL of website
+
+REGISTRATION=true # Default true, set to false to disable registration (only for local email/password)
+
+# OAuth — Needed for login with your own OIDC provider (e.g. Authelia, Keycloak, etc.)
+AUTH_OIDC_LOGIN_ONLY=false # Default false, set to true if you want to disable local email/password login 
+AUTH_OIDC_PROVIDER_ID="authelia"
+AUTH_OIDC_NAME="Authelia"
+AUTH_OIDC_CLIENT_ID=""
+AUTH_OIDC_CLIENT_SECRET=""
+AUTH_OIDC_ISSUER="https://your-identity-provider.example.com"
+AUTH_OIDC_SCOPE="openid profile email groups offline_access" # Default , not needed if this is all its needed
 ```
 
 ## Stack
@@ -121,8 +133,10 @@ samariumtcg/
 
 ### Phase 2: Next - Authentication & User Management
 
-- [ ] OAuth / SSO (Google, GitHub, custom)
-- [ ] User registration and login
+- ✅ OAuth / SSO (Custom OIDC)
+- ✅ User registration and login
+- [ ] Email through nodemailer integration
+- [ ] User password reset possibilities (reset password from sign in and from dashboard)
 - [ ] User profile and preferences
 - [ ] Theme toggle (dark/light)
 - [ ] Language selection
