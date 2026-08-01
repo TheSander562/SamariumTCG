@@ -9,6 +9,7 @@ A self-hosted web application to track your Trading Card Game collection with de
 
 ## Features (Planned)
 
+- **Email capabilities**: Send email notifications and reset password emails
 - **Collection Management**: Track cards, quantities, and collection numbers
 - **Expansion Overview**: View sets with completion progress and checklists
 - **Advanced Search**: Filter by name, type, rarity, HP, artist, and ownership status
@@ -134,6 +135,8 @@ samariumtcg/
 
 - ✅ OAuth / SSO (Custom OIDC)
 - ✅ User registration and login
+- [ ] Email through nodemailer integration
+- [ ] User password reset possibilities (reset password from sign in and from dashboard)
 - [ ] User profile and preferences
 - [ ] Theme toggle (dark/light)
 - [ ] Language selection
