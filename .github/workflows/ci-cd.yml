@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       reason:
-        description: 'Why are you running this manually? (optional, shows in the run log)'
+        description: 'Why are you running this manually? (optionally)'
         required: false
         type: string
 
