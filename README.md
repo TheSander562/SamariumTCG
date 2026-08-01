@@ -5,7 +5,7 @@ A self-hosted web application to track your Trading Card Game collection with de
 ## Features (Implemented)
 
 - **Website using docker**: Through docker compose port 3000 can be opened
-- **Multi-Account/Login Support**: Local login + Passkeys + OAuth SSO (Authelia tested but supporting many OIDC providers)
+- **Multi-Account/Login Support**: Local login + TOTP + Passkeys + OAuth SSO (Authelia tested but supporting many OIDC providers)
 
 ## Features (Planned)
 
