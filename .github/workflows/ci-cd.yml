@@ -4,17 +4,16 @@ on:
   push:
     branches: [main, 'feature/**']
     paths:
+      - '*.json'
+      - '*.mjs'
+      - '*.ts'
       - '.github/**'
-      - 'src/**'
-      - 'prisma/**'
-      - 'package.json'
-      - 'package-lock.json'
+      - 'docker/**'
       - 'docker-compose.yml'
       - 'Dockerfile'
-      - 'Dockerfile-slim'
-      - 'next.config.ts'
-      - 'tsconfig.json'
-      - 'prisma.config.ts'
+      - 'prisma/**'
+      - 'public/**'
+      - 'src/**'
   pull_request:
     branches:
       - main
