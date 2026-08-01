@@ -31,16 +31,6 @@ export function getAuth() {
     plugins: [
       twoFactor({
         issuer: "SamariumTCG",
-        otpOptions: {
-          period: 60, // seconds
-          sendOTP: async ({ user, otp }) => {
-            // await sendOTPEmail(
-            // 	user.email,
-            // 	otp,
-            // );
-            return;
-          },
-        },
         totpOptions: {
           period: 30, // seconds
           digits: 6,

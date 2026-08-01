@@ -23,6 +23,7 @@ export default async function DashboardPage() {
     },
     select: {
       emailVerified: true,
+      twoFactorEnabled: true,
       accounts: {
         select: {
           id: true,
@@ -50,6 +51,7 @@ export default async function DashboardPage() {
       hasPassword={accounts.some(
         (account) => account.providerId === "credential"
       )}
+      twoFactorEnabled={user?.twoFactorEnabled ?? false}
       passkeys={user?.passkeys ?? []}
     />
   );

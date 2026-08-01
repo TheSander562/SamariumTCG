@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { setPasswordAction } from "@/app/dashboard/actions";
 
+import QRCode from "react-qr-code";
+
 import SignOutButton from "@/app/dashboard/sign-out-button";
 
 type Props = {
@@ -19,6 +21,7 @@ type Props = {
     providerId: string;
   }[];
   hasPassword: boolean;
+  twoFactorEnabled: boolean;
   passkeys: {
     id: string;
     name: string | null;
@@ -30,6 +33,7 @@ export default function DashboardClient({
   emailVerified,
   accounts,
   hasPassword,
+  twoFactorEnabled,
   passkeys,
 }: Props) {
   const router = useRouter();
@@ -43,7 +47,18 @@ export default function DashboardClient({
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const [passkeyName, setPasskeyName] = useState("");
 
+  const [totpPassword, setTotpPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [totpMessage, setTotpMessage] = useState<string | null>(null);
+  const [totpError, setTotpError] = useState<string | null>(null);
+  const [totpSetup, setTotpSetup] = useState<{ totpURI: string } | null>(null);
+  const [totpUri, setTotpUri] = useState<string | null>(null);
+  const [isSettingUpTotp, setIsSettingUpTotp] = useState(false);
+  const [isVerifyingTotp, setIsVerifyingTotp] = useState(false);
+  const [isDisablingTotp, setIsDisablingTotp] = useState(false);
+
   const { user } = session;
+  const canUseTotp = hasPassword;
 
   async function verifyEmail() {
     const response = await fetch("/api/account/verify-email", {
@@ -109,6 +124,95 @@ export default function DashboardClient({
       return;
     }
 
+    router.refresh();
+  }
+
+  async function startTotpSetup() {
+    if (!totpPassword.trim()) {
+      setTotpError("Enter your current password to continue:");
+      return;
+    }
+
+    setTotpError(null);
+    setTotpMessage(null);
+    setTotpSetup(null);
+    setTotpUri(null);
+    setIsSettingUpTotp(true);
+
+    const enableResult = await authClient.twoFactor.enable({
+      password: totpPassword.trim(),
+    });
+
+    setIsSettingUpTotp(false);
+
+    if (enableResult.error) {
+      setTotpError(enableResult.error.message ?? "Failed to enable TOTP.");
+      return;
+    }
+
+    const generatedUri = enableResult.data?.totpURI ?? null;
+
+    if (!generatedUri) {
+      setTotpError("Failed to prepare TOTP setup.");
+      return;
+    }
+
+    setTotpPassword("");
+    setTotpSetup({
+      totpURI: generatedUri,
+    });
+    setTotpUri(generatedUri);
+  }
+
+  async function verifyTotpSetup() {
+    if (!totpSetup) {
+      return;
+    }
+
+    setTotpError(null);
+    setTotpMessage(null);
+    setIsVerifyingTotp(true);
+
+    const result = await authClient.twoFactor.verifyTotp({
+      code: totpCode.trim(),
+    });
+
+    setIsVerifyingTotp(false);
+
+    if (result.error) {
+      setTotpError(result.error.message ?? "Failed to verify TOTP code.");
+      return;
+    }
+
+    setTotpCode("");
+    setTotpSetup(null);
+    setTotpMessage("TOTP enabled successfully.");
+    router.refresh();
+  }
+
+  async function disableTotp() {
+    if (!totpPassword.trim()) {
+      setTotpError("Enter your current password to continue:");
+      return;
+    }
+
+    setTotpError(null);
+    setTotpMessage(null);
+    setIsDisablingTotp(true);
+
+    const result = await authClient.twoFactor.disable({
+      password: totpPassword.trim(),
+    });
+
+    setIsDisablingTotp(false);
+
+    if (result.error) {
+      setTotpError(result.error.message ?? "Failed to disable TOTP.");
+      return;
+    }
+
+    setTotpPassword("");
+    setTotpMessage("TOTP disabled successfully.");
     router.refresh();
   }
 
@@ -234,6 +338,113 @@ export default function DashboardClient({
           </>
         )}
       </section>
+
+      {canUseTotp && (
+        <section className="w-full rounded-md border border-neutral-700 p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-medium">
+              Two-factor authentication
+            </h2>
+
+            {twoFactorEnabled ? (
+              <span className="text-sm text-green-400">
+                ✓ Enabled
+              </span>
+            ) : (
+              <span className="text-sm text-yellow-400">
+                ⚠ Disabled
+              </span>
+            )}
+          </div>
+
+          <p className="mt-2 text-sm text-neutral-400">
+            Secure your account with a TOTP authenticator app.
+          </p>
+
+          {totpMessage && (
+            <p className="mt-3 text-sm text-green-400">
+              {totpMessage}
+            </p>
+          )}
+
+          {totpError && (
+            <p className="mt-3 text-sm text-red-400">
+              {totpError}
+            </p>
+          )}
+
+          <input
+            type="password"
+            value={totpPassword}
+            onChange={(e) => {
+              setTotpPassword(e.target.value);
+              setTotpError(null);
+            }}
+            placeholder="Current password"
+            className="mt-3 w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2"
+          />
+
+          {twoFactorEnabled ? (
+            <button
+              onClick={disableTotp}
+              disabled={isDisablingTotp || !totpPassword.trim()}
+              className="mt-3 w-full rounded-md bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isDisablingTotp ? "Disabling..." : "Disable TOTP"}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={startTotpSetup}
+                disabled={isSettingUpTotp || !totpPassword.trim()}
+                className="mt-3 w-full rounded-md bg-white px-4 py-2 font-medium text-black hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSettingUpTotp ? "Preparing..." : "Enable TOTP"}
+              </button>
+
+              {totpSetup && (
+                <div className="mt-3 space-y-3 rounded-md border border-neutral-800 p-3">
+                  <p className="text-sm text-neutral-300">
+                    Scan the QR code in your authenticator app or enter the secret manually.
+                  </p>
+
+                  {totpUri && (
+                    <div className="flex justify-center rounded-md border border-neutral-800 bg-neutral-950 p-3">
+                      <div className="rounded-md bg-white p-3">
+                        <QRCode value={totpUri ?? totpSetup?.totpURI ?? ""} size={220} level="M" />
+                      </div>
+                    </div>
+                  )}
+
+                  <textarea
+                    readOnly
+                    value={totpSetup.totpURI}
+                    className="min-h-24 w-full rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-xs"
+                  />
+
+                  <input
+                    value={totpCode}
+                    onChange={(e) => {
+                      setTotpCode(e.target.value);
+                      setTotpError(null);
+                    }}
+                    placeholder="Enter 6-digit code"
+                    className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2"
+                  />
+
+                  <button
+                    onClick={verifyTotpSetup}
+                    disabled={isVerifyingTotp || totpCode.trim().length < 6}
+                    className="w-full rounded-md bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isVerifyingTotp ? "Verifying..." : "Verify & Enable"}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      )}
 
       <section className="w-full rounded-md border border-neutral-700 p-4">
         <h2 className="font-medium">
