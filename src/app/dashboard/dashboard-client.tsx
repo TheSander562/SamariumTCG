@@ -331,7 +331,8 @@ export default function DashboardClient({
 
             <button
               onClick={addPassword}
-              className="mt-3 w-full rounded-md bg-white px-4 py-2 font-medium text-black hover:bg-gray-200"
+              disabled={!password.trim() || !passwordConfirm.trim()}
+              className="mt-3 w-full rounded-md bg-white px-4 py-2 font-medium text-black hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Enable Password Login
             </button>
