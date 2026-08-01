@@ -12,11 +12,11 @@
     "db:deploy": "prisma migrate deploy"
   },
   "dependencies": {
-    "@better-auth/passkey": "^1.6.25",
-    "@better-auth/prisma-adapter": "^1.6.25",
+    "@better-auth/passkey": "^1.7.0-rc.2",
+    "@better-auth/prisma-adapter": "^1.7.0-rc.2",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
-    "better-auth": "^1.6.25",
+    "better-auth": "^1.7.0-rc.2",
     "next": "16.2.12",
     "pg": "^8.22.0",
     "react": "19.2.8",

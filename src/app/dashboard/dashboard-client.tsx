@@ -150,7 +150,9 @@ export default function DashboardClient({
       return;
     }
 
-    const generatedUri = enableResult.data?.totpURI ?? null;
+    const generatedUri = enableResult.data?.method === "totp"
+      ? enableResult.data.totpURI ?? null
+      : null;
 
     if (!generatedUri) {
       setTotpError("Failed to prepare TOTP setup.");

@@ -67,3 +67,7 @@ export function getAuth() {
     },
   });
 }
+
+// Needed for auth generate and migrate commands
+// export const auth = getAuth();
+// export default auth;

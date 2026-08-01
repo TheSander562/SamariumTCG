@@ -46,7 +46,8 @@ CREATE TABLE "session" (
 -- CreateTable
 CREATE TABLE "account" (
     "id" TEXT NOT NULL,
-    "accountId" TEXT NOT NULL,
+    "issuer" TEXT NOT NULL,
+    "providerAccountId" TEXT NOT NULL,
     "providerId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "accessToken" TEXT,
@@ -193,6 +194,9 @@ ON "session"("token");
 
 CREATE INDEX "session_userId_idx"
 ON "session"("userId");
+
+CREATE UNIQUE INDEX "account_issuer_providerAccountId_uidx"
+ON "account"("issuer", "providerAccountId");
 
 CREATE INDEX "account_userId_idx"
 ON "account"("userId");

@@ -37,8 +37,8 @@ export default function SignInForm({
   const effectiveError = error ?? authErrorMessage;
 
   async function handleOIDCSignIn() {
-    await authClient.signIn.oauth2({
-      providerId: oidcProviderId,
+    await authClient.signIn.social({
+      provider: oidcProviderId,
       callbackURL: "/dashboard",
       errorCallbackURL: "/auth/sign-in",
     });

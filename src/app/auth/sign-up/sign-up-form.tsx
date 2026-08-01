@@ -37,8 +37,8 @@ export default function SignUpForm({
   const effectiveError = error ?? authErrorMessage;
 
   async function handleOIDCSignUp() {
-    await authClient.signIn.oauth2({
-      providerId: oidcProviderId,
+    await authClient.signIn.social({
+      provider: oidcProviderId,
       callbackURL: "/dashboard",
       errorCallbackURL: "/auth/sign-up",
     });
