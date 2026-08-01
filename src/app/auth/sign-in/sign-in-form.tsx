@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
@@ -26,21 +26,15 @@ export default function SignInForm({
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
   const [isSubmittingTwoFactor, setIsSubmittingTwoFactor] = useState(false);
-  const [showAuthError, setShowAuthError] = useState(false);
+  const authError = searchParams.get("error");
+  const authErrorDescription = searchParams.get("error_description");
+  const authErrorMessage = authError
+    ? authError === "account_not_linked"
+      ? "The email of the local account is not verified. Please sign in with the local account and verify the email or use a different email."
+      : authErrorDescription || "Authentication failed. Please try again."
+    : null;
 
-  useEffect(() => {
-    const authError = searchParams.get("error");
-    const description = searchParams.get("error_description");
-
-    if (authError) {
-      setShowAuthError(true);
-      setError(
-        authError === "account_not_linked"
-          ? "The email of the local account is not verified. Please sign in with the local account and verify the email or use a different email."
-          : description || "Authentication failed. Please try again."
-      );
-    }
-  }, [searchParams]);
+  const effectiveError = error ?? authErrorMessage;
 
   async function handleOIDCSignIn() {
     await authClient.signIn.oauth2({
@@ -118,9 +112,9 @@ export default function SignInForm({
         Sign In
       </h1>
 
-      {error && (
+      {effectiveError && (
         <p className="text-red-500">
-          {error}
+          {effectiveError}
         </p>
       )}
 
@@ -192,30 +186,6 @@ export default function SignInForm({
           Create one
         </Link>
       </p>
-
-      {showAuthError && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-sm rounded-lg border border-neutral-700 bg-neutral-900 p-6 shadow-xl">
-            <h2 className="text-lg font-semibold text-white">
-              Authentication issue
-            </h2>
-
-            <p className="mt-2 text-sm text-neutral-400">
-              {error || "Authentication failed. Please try again."}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowAuthError(false);
-              }}
-              className="mt-4 w-full rounded-md bg-white px-4 py-2 font-medium text-black hover:bg-gray-200"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
 
       {showTwoFactor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">

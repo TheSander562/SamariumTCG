@@ -13,14 +13,14 @@ export function getAuth() {
     emailAndPassword: {
       enabled: true,
       resetPasswordTokenExpiresIn: 60 * 60, // 1 hour
-      sendResetPassword: async ({user, url}) => {
+      //sendResetPassword: async ({user, url}) => {
         // await sendResetPasswordEmail(
         // 	user.name,
         //   user.email,
         //   url,
         // );
-        return;
-      },
+      //  return;
+      //},
     },
     session: {
       cookieCache: {
