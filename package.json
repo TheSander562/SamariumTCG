@@ -12,15 +12,15 @@
     "db:deploy": "prisma migrate deploy"
   },
   "dependencies": {
-    "@better-auth/passkey": "^1.7.7",
+    "@better-auth/passkey": "^1.7.12",
     "@better-auth/prisma-adapter": "^1.7.0-rc.5",
-    "@prisma/adapter-pg": "^7.10.0",
-    "@prisma/client": "^7.10.0",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "better-auth": "^1.7.0-rc.5",
-    "next": "16.4.0",
+    "next": "16.4.2",
     "pg": "^8.23.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-qr-code": "^2.2.0"
   },
   "devDependencies": {
@@ -30,8 +30,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.0",
-    "prisma": "^7.10.0",
+    "eslint-config-next": "16.4.2",
+    "prisma": "^7.10.1",
     "tailwindcss": "^4",
     "typescript": "^6.0.3"
   },
